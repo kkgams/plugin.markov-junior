@@ -1,0 +1,39 @@
+/*
+Port of emmalloc, modified for use in Odin.
+
+Invariants:
+	- Per-allocation header overhead is 8 bytes, smallest allocated payload
+	  amount is 8 bytes, and a multiple of 4 bytes.
+	- Acquired memory blocks are subdivided into disjoint regions that lie
+	  next to each other.
+	- A region is either in used or free.
+	  Used regions may be adjacent, and a used and unused region
+	  may be adjacent, but not two unused ones - they would be
+	  merged.
+	- Memory allocation takes constant time, unless the alloc needs to wasm_memory_grow()
+	  or memory is very close to being exhausted.
+	- Free and used regions are managed inside "root regions", which are slabs
+	  of memory acquired via wasm_memory_grow().
+	- Memory retrieved using wasm_memory_grow() can not be given back to the OS.
+	  Therefore, frees are internal to the allocator.
+
+Copyright (c) 2010-2014 Emscripten authors, see AUTHORS file.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/

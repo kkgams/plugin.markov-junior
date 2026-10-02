@@ -1,0 +1,5 @@
+<sequence values="XBDSPWNUARC" symmetry="(xy)">
+  <all in="X" out="B"/>
+  <all in="W" out="B"/>
+  <all in="P" out="X"/>
+</sequence>

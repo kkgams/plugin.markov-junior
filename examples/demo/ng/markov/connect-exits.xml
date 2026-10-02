@@ -1,0 +1,82 @@
+<sequence values="XBDSPWNUARC" symmetry="(xy)">
+  <all in="XB" out="XW"/>
+  <all in="XW/WB" out="XW/WW"/>
+  <one in="D" out="P" steps="1"/>
+  <sequence>
+    <path from="P" to="D" on="BP" color="P" steps="1"/>
+    <one in="PD" out="PP"/>
+  </sequence>
+  <all in="PB" out="PN"/>
+  <all in="BN/NP" out="NN/NP"/>
+  <all in="N" out="P"/>
+  <all in="WPPB" out="WPPP"/>
+  <!-- Pack temporary subrooms until no all-B area remains. Each rule requires
+       a one-tile B border and only writes the center, so rooms cannot overlap
+       or touch each other when placed. -->
+  <markov comment="pack subrooms with one-tile gutters">
+    <union symbol="T" values="BW"/>
+    <one>
+      <rule in="TTTTTTT/TTTTTTT/TTTTTTT/TTTTTTT/TTTTTTT" out="*******/*RRRRR*/*RRRRR*/*RRRRR*/*******"/>
+      <rule in="TTTTTT/TTTTTT/TTTTTT/TTTTTT/TTTTTT" out="******/*RRRR*/*RRRR*/*RRRR*/******"/>
+      <rule in="TTTTT/TTTTT/TTTTT/TTTTT/TTTTT" out="*****/*RRR*/*RRR*/*RRR*/*****"/>
+      <rule in="TTTT/TTTT/TTTT/TTTT" out="****/*RR*/*RR*/****"/>
+    </one>
+  </markov>
+  <!-- Connect subrooms. This loop is safe because the first rule claims rooms
+       already touching the network before path gets a chance to draw a zero
+       length connector. When no R can be claimed or reached, it terminates and
+       remaining isolated R is discarded below. -->
+  <markov comment="connect subrooms">
+    <sequence>
+      <one comment="claim room touching network">
+        <rule in="RP" out="CP"/>
+        <rule in="PR" out="PC"/>
+        <rule in="R/P" out="C/P"/>
+        <rule in="P/R" out="P/C"/>
+        <rule in="RS" out="CS"/>
+        <rule in="SR" out="SC"/>
+        <rule in="R/S" out="C/S"/>
+        <rule in="S/R" out="S/C"/>
+        <rule in="RC" out="CC"/>
+        <rule in="CR" out="CC"/>
+        <rule in="R/C" out="C/C"/>
+        <rule in="C/R" out="C/C"/>
+      </one>
+      <markov comment="flood claimed room">
+        <all>
+          <rule in="CR" out="CC"/>
+          <rule in="RC" out="CC"/>
+          <rule in="C/R" out="C/C"/>
+          <rule in="R/C" out="C/C"/>
+        </all>
+      </markov>
+      <path from="R" to="SPC" on="B" color="A" steps="1" inertia="True"/>
+      <one comment="claim room reached by connector">
+        <rule in="RA" out="CA"/>
+        <rule in="AR" out="AC"/>
+        <rule in="R/A" out="C/A"/>
+        <rule in="A/R" out="A/C"/>
+      </one>
+      <markov comment="flood reached room">
+        <all>
+          <rule in="CR" out="CC"/>
+          <rule in="RC" out="CC"/>
+          <rule in="C/R" out="C/C"/>
+          <rule in="R/C" out="C/C"/>
+        </all>
+      </markov>
+      <all in="A" out="P"/>
+    </sequence>
+  </markov>
+  <all in="PB/CC" out="PP/CC"/>
+  <all in="C" out="P"/>
+  <all in="PPB/BPP" out="PPP/PPP"/>
+  <all in="PPB/PPP/BPP" out="PPP/PPP/PPP"/>
+  <all in="WPW" out="PPP"/>
+  <all in="WPB" out="WPP"/>
+  <markov>
+    <all in="BPB" out="PPP"/>
+    <all in="PBP" out="PPP"/>
+  </markov>
+  <!-- Cleanup -->
+</sequence>

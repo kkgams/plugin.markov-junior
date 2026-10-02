@@ -1,0 +1,56 @@
+package gams:markov-junior@1.0.0;
+
+interface markov-junior {
+    resource session;
+
+    record run-config {
+        width: u32,
+        height: u32,
+        depth: u32,
+        seed: u64,
+        max-steps: u32,
+    }
+
+    record create-config {
+        width: u32,
+        height: u32,
+        depth: u32,
+        seed: u64,
+    }
+
+    record grid {
+        width: u32,
+        height: u32,
+        depth: u32,
+        values: string,
+        cells: list<u8>,
+        steps-run: u32,
+        changed: bool,
+        done: bool,
+    }
+
+    record session-state {
+        handle: session,
+        grid: grid,
+    }
+
+    /// Run a prepared MarkovJunior IR deterministically.
+    ///
+    /// MVP deliberately has no filesystem imports. XML, PNG, VOX, and other
+    /// resource formats are compiled outside the component into `model-ir` and
+    /// raw indexed grid bytes.
+    run: func(model-ir: list<u8>, initial-cells: list<u8>, config: run-config) -> result<grid, string>;
+
+    /// Create a persistent execution session without advancing generation.
+    create: func(model-ir: list<u8>, initial-cells: list<u8>, config: create-config) -> result<session-state, string>;
+
+    /// Advance a persistent session by at most `steps` ticks.
+    step: func(handle: borrow<session>, steps: u32) -> result<grid, string>;
+
+    /// Explicitly dispose session-owned execution state.
+    dismiss: func(handle: borrow<session>) -> result<_, string>;
+}
+
+world markov-junior-plugin {
+    export markov-junior;
+}

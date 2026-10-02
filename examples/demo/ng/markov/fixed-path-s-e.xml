@@ -1,0 +1,3 @@
+<markov values="XBSEP">
+  <path from="S" to="E" on="B" color="P"/>
+</markov>
