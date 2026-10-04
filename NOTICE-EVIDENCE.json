@@ -20,7 +20,7 @@
     "component": {
       "artifacts": [
         "plugin.markov-junior.wasm",
-        "plugin.markov-junior-tooling-0.1.0.zip"
+        "plugin.markov-junior-tooling-0.2.0.zip"
       ],
       "binding": "markov_junior_plugin",
       "members": [
@@ -32,7 +32,7 @@
       "world": "markov-junior-plugin"
     },
     "files": {
-      "dist/plugin.markov-junior-tooling-0.1.0.zip": "tooling/plugin.markov-junior-tooling-0.1.0.zip",
+      "dist/plugin.markov-junior-tooling-0.2.0.zip": "tooling/plugin.markov-junior-tooling-0.2.0.zip",
       "dist/plugin.markov-junior.wasm": "plugins/markov-junior.comp.wasm"
     }
   },
@@ -76,7 +76,7 @@
     "SOURCE-INPUTS.json": "3142dcfd635a027fe495c2818d97ef4ead623ae31e412c9da41a57ea157fdc16",
     "THIRD-PARTY-REVIEW.md": "924994ba2668ae4cabc1d77cf87fcddf8c153be1e9d25bb810d8f8c90470dfde",
     "THIRD-PARTY-SOURCE.json": "5ecf5a6806edc0c79b521247de390972d0829987f991fd59707d843f47f366dc",
-    "component.json": "588d4214156efce02ba0bbb0e80db8207e4cf178f9c1d184e96e02a2ad6205b5",
+    "component.json": "93b9b535da0f0d670455dba232aa93829f13a13219d724d90b20995cb2450fe1",
     "examples/demo/ng/markov/cleanup.xml": "cfaa21689a7fe4131edbb8e816b6d58bffd34e799f5154a6eb0b96dc6f54552f",
     "examples/demo/ng/markov/connect-exits.xml": "59d90761dd19bfb847ed3b66a7e2ecb23aad0a1b09c02e99e7258e03172f1955",
     "examples/demo/ng/markov/fixed-maze-growth.xml": "b85ad7bc9a198a7eab3075ee17c59e293042bf65f7dd6c984a81573e653181d1",
@@ -155,7 +155,7 @@
     "scripts/wasm-notices.py": "91d94800f753ae948e9289393da9b6b63f6dc24e154a41fbdae2fd59f9305d85",
     "test/runtime.mjs": "d0bcae167cdbf0b4bc9f6a02821a03a8d7469fdaa18a14a10ca2ddcca0ea1c7c",
     "test/test_integrity.py": "35936d0df14d552d49acf5aaa707dbd38024dbc164acf7c939ebedbe0f5219f2",
-    "version.txt": "e9dd8507f4bf0c6f42458e41aea833ad0bd3f6127272335eee9bf4d58541ed67"
+    "version.txt": "1f930dd1f133c1f97a94fe3acb8db34372cf4c01ffdb2b3ff4ca72f9494121e9"
   },
   "findings": [
     "Generated C component ABI glue uses flake-pinned wit-bindgen v0.57.1 (2e00369a643c0c8048b8636401e36b0cbf2dfb05); complete upstream MIT/Apache choices retained, not assumed owner-authored glue. Generated Go ABI bindings use the separately inventoried wit-bindgen-go module tool.",

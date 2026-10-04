@@ -1,14 +1,14 @@
 {
-  "name": "plugin.markov-junior",
-  "slug": "markov-junior",
-  "source": "markov-junior",
-  "world": "markov-junior-plugin",
+  "artifacts": [
+    "plugin.markov-junior.wasm",
+    "plugin.markov-junior-tooling-0.2.0.zip"
+  ],
   "binding": "markov_junior_plugin",
   "members": [
     "markov-junior"
   ],
-  "artifacts": [
-    "plugin.markov-junior.wasm",
-    "plugin.markov-junior-tooling-0.1.0.zip"
-  ]
+  "name": "plugin.markov-junior",
+  "slug": "markov-junior",
+  "source": "markov-junior",
+  "world": "markov-junior-plugin"
 }
