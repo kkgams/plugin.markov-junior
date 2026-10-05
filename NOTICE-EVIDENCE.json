@@ -36,13 +36,49 @@
       "dist/plugin.markov-junior.wasm": "plugins/markov-junior.comp.wasm"
     }
   },
+  "documentation_cleanup": {
+    "audit_origin": "audit_generator_sha256 and audit_input_sha256 identify the preserved historical audit; that generator was not rerun for this delta",
+    "baseline_commit": "58cdcf9a1f73c43fb09732f71a40700b667fdcbf",
+    "changed_inputs": {
+      "README.md": {
+        "after": "5bbb07ecbceb75c8b2ebebb3bf6066a8afeea4060eeb3c74a92653c3adf41d77",
+        "before": "c0b051c43a612395eaf39937613138bf63bf52fec2ca98d78eb546aa22558c18"
+      },
+      "SOURCE-INPUTS.json": {
+        "after": "579dd42e94d50f27c29ecae37e9f0914ebe594f1e88ebc93bd2e4d5c3aad4018",
+        "before": "3142dcfd635a027fe495c2818d97ef4ead623ae31e412c9da41a57ea157fdc16"
+      },
+      "THIRD-PARTY-SOURCE.json": {
+        "after": "72625d45bc5960c98f9ac585d8434e8657c473bc398a1df3c18124410a9611ea",
+        "before": "5ecf5a6806edc0c79b521247de390972d0829987f991fd59707d843f47f366dc"
+      },
+      "scripts/build.py": {
+        "after": "883e0420eb90e6d297a8b4346bf2bc96894d3e3b690381fd7df4b07685e72e3a",
+        "before": "40e1ddf6e4bdda34d4456411bcbfa0850a2905b467d4a1ca7448cee634be396d"
+      },
+      "scripts/publication.py": {
+        "after": "058cdb64ab19ec1db7650531b2910ddb6c465764c888d208b683b14c87fcd2ad",
+        "before": "f4c97f3a84c866942e7427392d156144aff53f35e4149c2def3c171368bd8391"
+      }
+    },
+    "previous_evidence_sha256": "152ab9aee2d3a131c234cc421102d54d59d0af4695c7de6054462735c6f3102a",
+    "previous_notice_sha256": "aaef821897645c7eaa94dfb5c0cf2c482c0465075f86103501894421886b46ac",
+    "previous_source_inputs_sha256": "3142dcfd635a027fe495c2818d97ef4ead623ae31e412c9da41a57ea157fdc16",
+    "publication_approval": "not granted; review and approve the new NOTICE digest and final hosted candidate before publication",
+    "refresh_script_sha256": "d78875f73df7503a9b684571fd6ed29e3ab23c7104f9626e6ac91d781ce017ab",
+    "removed_documents": {
+      "CONTEXT.md": "e4069de0da5771bed25fc66318b6dd5f7ec834a48bb21d2abf8763d18ba5aba9",
+      "PREPARATION.md": "c327c94ed429f493a0b38df178581959a7fb27dc2568724b08f29befc3e6be3a",
+      "plugins/markov-junior.comp/TODO.md": "931ecd26a53f0b90016adf4d65ff17e68f7219fd1cfc94134855e97c140b37f0"
+    },
+    "rule": "Only documentation removal/rewrite, documentation-reference strings, removal of the archived TODO entry from the source manifest, and exact input-manifest refresh. Third-party code, terms, NOTICE body, toolchains, tests, and verification rules are unchanged."
+  },
   "files_sha256": {
     ".envrc": "1d26c74fd25a4c3dbb09e029fc609588da499fd4af2a41c88f6316c7f8c54cf1",
     ".gitattributes": "02a00a5e791aceec9288ce23f6ccdd26fb5356bc6da5f926c1866c1b906d1d8e",
     ".github/workflows/release.yml": "5b57d05928f471eb1ef792ae9be6aab02aaf70e557be0c62433c88cdd9080479",
     ".github/workflows/verify.yml": "ec66e6d7ccc76ebd1f77f725f5be0b83f783ff0efbbf4655658146a99ddc470b",
     ".gitignore": "35d5cf3e93f7c09e8bf44231a378d77943e69e97b4f5dc266e14053e1c45d541",
-    "CONTEXT.md": "e4069de0da5771bed25fc66318b6dd5f7ec834a48bb21d2abf8763d18ba5aba9",
     "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
     "LICENSES/CC0-1.0.txt": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
     "LICENSES/compiler-rt-full.txt": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
@@ -71,11 +107,10 @@
     "LICENSING.md": "9c90a7d909f589c226e600b2cd66f551d7769ba9de2b67fc2ee5e9d751de256e",
     "MARKOV-UPSTREAM-ATTRIBUTIONS.md": "442a0470fbc0c6e94abf40d3a59e67e22a91e7e2b9c2f024d82f9d9e911c7830",
     "Makefile": "bebe6c97ccd2d043a593ba5e1a2b27a0c4ff036f2ece06745806deead7d257bf",
-    "PREPARATION.md": "c327c94ed429f493a0b38df178581959a7fb27dc2568724b08f29befc3e6be3a",
-    "README.md": "c0b051c43a612395eaf39937613138bf63bf52fec2ca98d78eb546aa22558c18",
-    "SOURCE-INPUTS.json": "3142dcfd635a027fe495c2818d97ef4ead623ae31e412c9da41a57ea157fdc16",
+    "README.md": "5bbb07ecbceb75c8b2ebebb3bf6066a8afeea4060eeb3c74a92653c3adf41d77",
+    "SOURCE-INPUTS.json": "579dd42e94d50f27c29ecae37e9f0914ebe594f1e88ebc93bd2e4d5c3aad4018",
     "THIRD-PARTY-REVIEW.md": "924994ba2668ae4cabc1d77cf87fcddf8c153be1e9d25bb810d8f8c90470dfde",
-    "THIRD-PARTY-SOURCE.json": "5ecf5a6806edc0c79b521247de390972d0829987f991fd59707d843f47f366dc",
+    "THIRD-PARTY-SOURCE.json": "72625d45bc5960c98f9ac585d8434e8657c473bc398a1df3c18124410a9611ea",
     "component.json": "93b9b535da0f0d670455dba232aa93829f13a13219d724d90b20995cb2450fe1",
     "examples/demo/ng/markov/cleanup.xml": "cfaa21689a7fe4131edbb8e816b6d58bffd34e799f5154a6eb0b96dc6f54552f",
     "examples/demo/ng/markov/connect-exits.xml": "59d90761dd19bfb847ed3b66a7e2ecb23aad0a1b09c02e99e7258e03172f1955",
@@ -88,7 +123,6 @@
     "packages/util/markov-junior/xml-to-mjir.js": "501b71b009e9e103ab995f396919e5d19be6d5135f952f4c43604fc519d14cfd",
     "plugins/markov-junior.comp/MJIR.md": "43a6ff116f96ebe6bac4b6d972c7f341819d9cf802eabb41df5b7dbbf99dd527",
     "plugins/markov-junior.comp/README.md": "3fe168fd59e0a9364a601b32588ac82131b00ef62fc3a5d169a492e562fc806e",
-    "plugins/markov-junior.comp/TODO.md": "931ecd26a53f0b90016adf4d65ff17e68f7219fd1cfc94134855e97c140b37f0",
     "plugins/markov-junior.comp/compiler/xml-to-mjir.mjs": "e22dceb6fdb0638afed8da53e38e63ca846ab8faf280d18142766a4062d82815",
     "plugins/markov-junior.comp/component.c": "56b74c2fe96b05e955c8a0a51292fd5f89f8a58603b0701f397468dffed1cc99",
     "plugins/markov-junior.comp/docs/README.md": "c9c44357a8af0103dd82b96658ead9169c2e4bf131d5dfa5c14ce463cbd61d9b",
@@ -142,7 +176,7 @@
     "plugins/markov-junior.comp/test/root-one-fixtures.mjs": "ae94bd7d5bcd1d897d85b9934e84e0abc756232fd66036a72d86414fdc182b64",
     "plugins/markov-junior.comp/wit/package.wit": "ed50adf4cd882652087ef30bc0fe5c01ba5f4b6a56ef8535f0f0a116e7f6fdca",
     "script/markov-xml-to-mjir-json.mjs": "1b2168d412ee63cbdbef26a9fab978c868c69ab3142f3b88e49e0b8bdfc272c4",
-    "scripts/build.py": "40e1ddf6e4bdda34d4456411bcbfa0850a2905b467d4a1ca7448cee634be396d",
+    "scripts/build.py": "883e0420eb90e6d297a8b4346bf2bc96894d3e3b690381fd7df4b07685e72e3a",
     "scripts/candidate.py": "a75a8b1aec7af8e1ef5a78885d65945b848af5e5082a0323d952e89c43fe2f71",
     "scripts/check-licensing-digests.sh": "0dfa34f834af2e065e8cbf325cc8eaf2beaf6dc60093f802466799c48d59ff21",
     "scripts/check-release-absent.sh": "b272d90ea21eda68ff59ea656d465b17da50a778224c7bf874ea8ea00c2febc8",
@@ -150,7 +184,7 @@
     "scripts/check-source.py": "b4bff79c8d7d13ea121d9e18a921084c0e076474a631de8c430701873440a72c",
     "scripts/inputs.py": "c61e7cd875d429d623d083da40c65639b2b311cb1a046bad5316efa1229e71d7",
     "scripts/legal.py": "6e9633f143a4cc609c676c68541b5238fdc85c1454bdc898fc6367dc29f331f0",
-    "scripts/publication.py": "f4c97f3a84c866942e7427392d156144aff53f35e4149c2def3c171368bd8391",
+    "scripts/publication.py": "058cdb64ab19ec1db7650531b2910ddb6c465764c888d208b683b14c87fcd2ad",
     "scripts/tooling.py": "d98e1f61e60ee1d600a23d719a3637d2cc8b5249e37c890180528b3223b5ea34",
     "scripts/wasm-notices.py": "91d94800f753ae948e9289393da9b6b63f6dc24e154a41fbdae2fd59f9305d85",
     "test/runtime.mjs": "d0bcae167cdbf0b4bc9f6a02821a03a8d7469fdaa18a14a10ca2ddcca0ea1c7c",
@@ -390,7 +424,7 @@
   },
   "repository": "plugin.markov-junior",
   "schema": 1,
-  "scope": "selected prepared repository/source inputs; no build executed",
+  "scope": "historical third-party source audit plus bounded documentation cleanup; no new build or audit executed",
   "shipped_host_source_files": [],
   "source_comparison_exclusions": {
     "directories": [

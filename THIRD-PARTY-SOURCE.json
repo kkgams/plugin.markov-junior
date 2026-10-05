@@ -1,7 +1,6 @@
 {
   "plugins/markov-junior.comp/MJIR.md": "43a6ff116f96ebe6bac4b6d972c7f341819d9cf802eabb41df5b7dbbf99dd527",
   "plugins/markov-junior.comp/README.md": "3fe168fd59e0a9364a601b32588ac82131b00ef62fc3a5d169a492e562fc806e",
-  "plugins/markov-junior.comp/TODO.md": "931ecd26a53f0b90016adf4d65ff17e68f7219fd1cfc94134855e97c140b37f0",
   "plugins/markov-junior.comp/compiler/xml-to-mjir.mjs": "e22dceb6fdb0638afed8da53e38e63ca846ab8faf280d18142766a4062d82815",
   "plugins/markov-junior.comp/component.c": "56b74c2fe96b05e955c8a0a51292fd5f89f8a58603b0701f397468dffed1cc99",
   "plugins/markov-junior.comp/docs/README.md": "c9c44357a8af0103dd82b96658ead9169c2e4bf131d5dfa5c14ce463cbd61d9b",
