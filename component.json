@@ -1,7 +1,7 @@
 {
   "artifacts": [
     "plugin.markov-junior.wasm",
-    "plugin.markov-junior-tooling-0.2.0.zip"
+    "plugin.markov-junior-tooling-0.2.1.zip"
   ],
   "binding": "markov_junior_plugin",
   "members": [

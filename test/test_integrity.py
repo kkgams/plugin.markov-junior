@@ -80,6 +80,33 @@ class InputTests(unittest.TestCase):
 
 
 class ZipTests(unittest.TestCase):
+    def test_live_build_tooling_name_matches_distribution_metadata(self):
+        # Exercise the real build ZIP writer with live repository metadata;
+        # only compilation and payload collection are stubbed for offline speed.
+        import os
+        import build as builder
+        source = Path(__file__).resolve().parents[1]
+        spec = json.loads((source / 'component.json').read_text())
+        version = (source / 'version.txt').read_text().strip()
+        expected = f'plugin.markov-junior-tooling-{version}.zip'
+        previous = Path.cwd()
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / 'version.txt').write_bytes((source / 'version.txt').read_bytes())
+            try:
+                os.chdir(root)
+                with patch.object(builder, 'ROOT', root), patch.object(builder, 'SPEC', spec), \
+                        patch.object(builder, 'verify_inputs'), patch.object(builder, 'run'), \
+                        patch.object(builder.subprocess, 'run'), \
+                        patch.object(builder, 'payload', return_value={'compiler.js': b'offline payload'}), \
+                        patch.object(Path, 'is_file', return_value=True), patch.object(Path, 'replace'):
+                    builder.build()
+                actual = sorted(p.name for p in (root / 'dist').glob('*.zip'))
+                self.assertEqual(actual, [expected])
+                self.assertEqual([p for p in spec['artifacts'] if p.endswith('.zip')], actual)
+            finally:
+                os.chdir(previous)
+
     def test_candidate_cli_rejects_recomputed_checksum_tamper(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
