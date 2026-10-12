@@ -29,11 +29,11 @@
   "LICENSES/wasmtime-Apache-LLVM.txt": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5",
   "LICENSES/wit-bindgen-Apache.txt": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
   "LICENSES/wit-bindgen-MIT.txt": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
-  "LICENSING.md": "9c90a7d909f589c226e600b2cd66f551d7769ba9de2b67fc2ee5e9d751de256e",
+  "LICENSING.md": "5ab40c24f99a7a4ef4e26af2f1aec0e769d3d4b6c19383bf27904fe51d87d60c",
   "MARKOV-UPSTREAM-ATTRIBUTIONS.md": "442a0470fbc0c6e94abf40d3a59e67e22a91e7e2b9c2f024d82f9d9e911c7830",
   "Makefile": "bebe6c97ccd2d043a593ba5e1a2b27a0c4ff036f2ece06745806deead7d257bf",
-  "README.md": "5bbb07ecbceb75c8b2ebebb3bf6066a8afeea4060eeb3c74a92653c3adf41d77",
-  "THIRD-PARTY-REVIEW.md": "924994ba2668ae4cabc1d77cf87fcddf8c153be1e9d25bb810d8f8c90470dfde",
+  "README.md": "7df4213935bf3f947763ec64b894c9e60b1b1f5c0c1bf8e91c695d291fb2b066",
+  "THIRD-PARTY-REVIEW.md": "3c313395ce0cc0ac168281750490d5a12fdc6b5e9f6556e5eba72747a7c37997",
   "THIRD-PARTY-SOURCE.json": "72625d45bc5960c98f9ac585d8434e8657c473bc398a1df3c18124410a9611ea",
   "component.json": "93b9b535da0f0d670455dba232aa93829f13a13219d724d90b20995cb2450fe1",
   "examples/demo/ng/markov/cleanup.xml": "cfaa21689a7fe4131edbb8e816b6d58bffd34e799f5154a6eb0b96dc6f54552f",
@@ -113,5 +113,5 @@
   "scripts/wasm-notices.py": "91d94800f753ae948e9289393da9b6b63f6dc24e154a41fbdae2fd59f9305d85",
   "test/runtime.mjs": "d0bcae167cdbf0b4bc9f6a02821a03a8d7469fdaa18a14a10ca2ddcca0ea1c7c",
   "test/test_integrity.py": "35936d0df14d552d49acf5aaa707dbd38024dbc164acf7c939ebedbe0f5219f2",
-  "version.txt": "1f930dd1f133c1f97a94fe3acb8db34372cf4c01ffdb2b3ff4ca72f9494121e9"
+  "version.txt": "71015c979ccb0fc8a0be7ca0ae83046ab045cdc2c8faa09fb2f0f7e440f9b4a6"
 }
