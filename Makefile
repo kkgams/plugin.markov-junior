@@ -11,7 +11,7 @@ WIKI_VERSION := v1.4.0
 WIKI_REPOSITORY := https://github.com/justgook/wiki
 WIKI_MAKEFILE := build.nosync/wiki-$(WIKI_VERSION).mk
 WIKI_ENGINE := $(abspath build.nosync/wiki-$(WIKI_VERSION))
-WIT := $(shell find plugins/markov-junior.comp/wit -type f)
+WIT := $(shell find plugins/markov-junior.comp/wit -type f -o -type d)
 LEGAL := LICENSE NOTICE LICENSING.md MARKOV-UPSTREAM-ATTRIBUTIONS.md $(sort $(wildcard LICENSES/*))
 export PYTHONDONTWRITEBYTECODE := 1
 export TMPDIR := $(abspath build.nosync/tmp)
@@ -27,10 +27,10 @@ build.nosync/markov-junior/markov_junior_plugin.c build.nosync/markov-junior/mar
 	mkdir -p build.nosync/markov-junior
 	cd build.nosync/markov-junior && wit-bindgen c ../../plugins/markov-junior.comp/wit -w markov-junior-plugin
 
-build.nosync/TERMS: $(LEGAL) Makefile | build.nosync/tmp
+build.nosync/TERMS: $(LEGAL) LICENSES Makefile | build.nosync/tmp
 	for file in $(LEGAL); do printf '\n--- %s ---\n' "$$file"; cat "$$file"; done > "$@"
 
-build.nosync/markov.o.obj: $(wildcard plugins/markov-junior.comp/markov_junior/*.odin) Makefile flake.lock | build.nosync/tmp
+build.nosync/markov.o.obj: $(wildcard plugins/markov-junior.comp/markov_junior/*.odin) plugins/markov-junior.comp/markov_junior Makefile flake.lock | build.nosync/tmp
 	odin build plugins/markov-junior.comp/markov_junior -target:wasi_wasm32 -build-mode:obj --no-entry-point -o:speed -out:$@
 
 build.nosync/plugin.markov-junior.wasm: build.nosync/markov.o.obj plugins/markov-junior.comp/component.c build.nosync/markov-junior/markov_junior_plugin.c build.nosync/markov-junior/markov_junior_plugin.h build.nosync/markov-junior/markov_junior_plugin_component_type.o build.nosync/TERMS scripts/wasm-notices.py Makefile flake.lock
@@ -40,7 +40,7 @@ build.nosync/plugin.markov-junior.wasm: build.nosync/markov.o.obj plugins/markov
 	$(PYTHON) scripts/wasm-notices.py embed "$@" --license build.nosync/TERMS --notice NOTICE
 	wasm-tools validate "$@"
 
-build.nosync/LICENSES.zip: $(LEGAL) Makefile | build.nosync/tmp
+build.nosync/LICENSES.zip: $(LEGAL) LICENSES Makefile | build.nosync/tmp
 	rm -f "$@"
 	zip -q -X "$@" $(LEGAL)
 
@@ -81,7 +81,8 @@ docs serve-docs validate-docs: $(WIKI_MAKEFILE)
 	$(MAKE) -f "$(WIKI_MAKEFILE)" "$(if $(filter docs,$@),build,$(patsubst %-docs,%,$@))" WIKI_REPOSITORY="$(WIKI_REPOSITORY)" WIKI_VERSION="$(WIKI_VERSION)" WIKI_ENGINE="$(WIKI_ENGINE)" WIKI_SOURCE="$(abspath docs)" WIKI_OUTPUT="$(abspath build.nosync/site)" PORT="$(DOCS_PORT)"
 
 TOOLING := $(shell find packages/util/markov-junior script examples/demo/ng/markov plugins/markov-junior.comp/compiler plugins/markov-junior.comp/test plugins/markov-junior.comp/docs -type f) plugins/markov-junior.comp/MJIR.md README.md $(LEGAL)
-build.nosync/plugin.markov-junior-tooling.zip: $(TOOLING) Makefile | build.nosync/tmp
+TOOLING_DIRS := $(shell find packages/util/markov-junior script examples/demo/ng/markov plugins/markov-junior.comp/compiler plugins/markov-junior.comp/test plugins/markov-junior.comp/docs LICENSES -type d)
+build.nosync/plugin.markov-junior-tooling.zip: $(TOOLING) $(TOOLING_DIRS) Makefile | build.nosync/tmp
 	rm -f "$@"
 	zip -q -X "$@" $(TOOLING)
 
