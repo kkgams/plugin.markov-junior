@@ -1,5 +1,3 @@
-# Licensing scope
+# Licensing
 
-Owner-approved Apache-2.0 applies only to GAMS-authored contributions. Third-party works retain the full terms in LICENSES/ and original source notices. The owner confirmed checksum/license preparation complete on 2026-10-12 and dropped pending owner review for 0.2.1 local release preparation, commits and annotated tags. THIRD-PARTY-REVIEW.md and source-bound NOTICE-EVIDENCE.json retain the historical audit and bounded refresh evidence; no new legal audit or hosted validation is claimed.
-
-Distribute LICENSE, NOTICE, NOTICE-EVIDENCE.json, THIRD-PARTY-REVIEW.md, LICENSING.md and every applicable LICENSES file with source, View ZIPs and compiler/tooling ZIPs; WASM release assets must retain readable terms beside embedded notices. ZIP/binary packaging must not drop those terms. Preparation is not publication approval.
+GAMS-authored contributions are Apache-2.0 under LICENSE. MarkovJunior code/resources retain Maxim Gumin's MIT terms and original attribution in MARKOV-UPSTREAM-ATTRIBUTIONS.md; fonts retain their full separate terms. Complete original dependency terms remain in LICENSES/ and source notices. Releases contain readable terms in LICENSES.zip and the tooling ZIP; complete terms and NOTICE are embedded in the component.

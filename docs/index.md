@@ -1,44 +1,37 @@
 ---
-title: Development
+title: plugin.markov-junior
+description: Deterministic grid generation and XML/MJIR compilation.
 status: reference
 ---
 
-# plugin.markov-junior development
+# plugin.markov-junior
 
-Build and verify the component with its pinned toolchain:
+Deterministic MarkovJunior grid generation for [GAMS](https://github.com/kkgams/gams).
 
-```sh
-nix develop --command make build
-nix develop --command make test
-```
+| Item | Source | Original work |
+| --- | --- | --- |
+| MarkovJunior component | `plugins/markov-junior.comp/` | Maxim Gumin, Odin port and GAMS integration |
+| XML/MJIR compiler and resources | `script/`, `packages/util/markov-junior/` | MarkovJunior and GAMS contributors |
 
-## Local Project and documentation
+## Development
 
-```sh
-nix develop --command make open  # build, then open this repository's gams.json
-make serve-docs                 # http://localhost:8080; DOCS_PORT overrides
-make validate-docs
-make docs                       # portable site under build/site/
-```
+Use the pinned Odin/C/WASI and Node toolchain: `nix develop --command make <target>`.
 
-`make open` builds `dist/plugin.markov-junior.wasm` and explicitly sets `GAMS_APP_CWD`
-to this repository. The local Project loads that component and the pinned
-released Files View to inspect Project files; it is not an API demo.
-The shell uses the released layout provider.
-No sibling source checkout is required.
+| Command | Purpose |
+| --- | --- |
+| `make build` | Compile the component with embedded complete terms. |
+| `make test` | Run existing dependency-free XML/MJIR compiler tests. |
+| `make package` | Build stable WASM, tooling ZIP, LICENSES.zip and SHA256SUMS in build.nosync/. |
+| `make open` | Build and open this Project in the released macOS Apple Silicon Host. |
+| `make docs` | Build pinned wiki in build.nosync/site/. |
+| `make serve-docs` | Serve wiki; independent DOCS_PORT defaults to 8080. |
+| `make validate-docs` | Validate wiki content. |
+| `make clean` | Remove build.nosync and identified downloads; refuse tracked paths/symlinks and preserve supplied tools/Units. |
 
-`make tools/gams.app` downloads the released macOS Apple Silicon Host only
-when absent and retains its notices under `tools/gams-release-notices/`.
-Existing downloads are not updated implicitly; macOS security checks remain
-intact. The first download and Project launch require network access.
-Pinned dependencies are declared in `gams.json`; Host caches live in ignored
-`gams_modules/`. Native GUI behavior requires separate verification.
+The tooling ZIP retains compiler/CLI sources, model resources, domain tests, reference tooling and complete terms; no precompiled replacement is supplied. See `plugins/markov-junior.comp/MJIR.md` and its docs for the format. Compiler tests do not execute the component or establish parity. Historical Host/reference parity tools remain available but require external resources and are not standalone coverage.
 
-Documentation uses pinned justgook/wiki v1.4.0, with ignored engine/output
-under `build/`. `build-docs` remains a build alias. GitHub Pages runs `make docs`
-on every push to `release`, independently of component release tags.
-Enable **Settings → Pages → Source → GitHub Actions**. Existing component
-build, runtime tests, candidate checks and matching-tag release rules are unchanged.
+The local Files View browses Project files; it is not a generation demo. The first launch downloads pinned supporting Units; an existing Host is never updated implicitly. GUI/runtime execution is separately verified.
 
-See the repository README and licensing/publication documents for API details,
-coverage limits and existing release gates.
+## API
+
+Exports `gams:markov-junior/markov-junior@1.0.0`, world `markov-junior-plugin`. `run` consumes prepared MJIR, initial indexed cells, dimensions, seed and step limit. `create`, `step` and `dismiss` manage sessions. No filesystem imports: compile XML/PNG/VOX resources outside the component. The complete contract is `plugins/markov-junior.comp/wit/package.wit`.
