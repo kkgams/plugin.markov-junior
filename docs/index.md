@@ -26,7 +26,7 @@ Use the pinned Odin/C/WASI and Node toolchain: `nix develop --command make <targ
 | `make docs` | Build pinned wiki in build.nosync/site/. |
 | `make serve-docs` | Serve wiki; independent DOCS_PORT defaults to 8080. |
 | `make validate-docs` | Validate wiki content. |
-| `make clean` | Remove build.nosync and identified downloads; refuse tracked paths/symlinks and preserve supplied tools/Units. |
+| `make clean` | Remove all of `build.nosync/`, `tools/` and `gams_modules/`, including unmarked contents; refuse tracked files and symlinks before deleting anything. |
 
 The tooling ZIP retains compiler/CLI sources, model resources, domain tests, reference tooling and complete terms; no precompiled replacement is supplied. See `plugins/markov-junior.comp/MJIR.md` and its docs for the format. Compiler tests do not execute the component or establish parity. Historical Host/reference parity tools remain available but require external resources and are not standalone coverage.
 
