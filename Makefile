@@ -12,13 +12,20 @@ WIKI_REPOSITORY := https://github.com/justgook/wiki
 WIKI_MAKEFILE := build.nosync/wiki-$(WIKI_VERSION).mk
 WIKI_ENGINE := $(abspath build.nosync/wiki-$(WIKI_VERSION))
 WIT := $(shell find plugins/markov-junior.comp/wit -type f -o -type d)
+WASI_CFLAGS := -Ibuild.nosync/markov-junior -O2 -DNDEBUG
 LEGAL := LICENSE NOTICE LICENSING.md MARKOV-UPSTREAM-ATTRIBUTIONS.md $(sort $(wildcard LICENSES/*))
 export PYTHONDONTWRITEBYTECODE := 1
 export TMPDIR := $(abspath build.nosync/tmp)
 
-.PHONY: test build package clean open docs serve-docs validate-docs
+.PHONY: compile_commands.json test build package clean open docs serve-docs validate-docs
 build: build.nosync/plugin.markov-junior.wasm
 package: build.nosync/plugin.markov-junior.wasm build.nosync/LICENSES.zip build.nosync/SHA256SUMS build.nosync/plugin.markov-junior-tooling.zip
+
+compile_commands.json: build.nosync/compile_commands.json
+
+build.nosync/compile_commands.json: Makefile flake.nix flake.lock scripts/compile-commands.py plugins/markov-junior.comp/component.c build.nosync/markov-junior/markov_junior_plugin.c build.nosync/markov-junior/markov_junior_plugin.h | build.nosync/tmp
+	$(PYTHON) scripts/compile-commands.py --entry wasi wasm32-wasip2-clang "$(WASI_CFLAGS)" "build.nosync/markov-junior/markov_junior_plugin.c plugins/markov-junior.comp/component.c" > "$@.tmp"
+	mv "$@.tmp" "$@"
 
 build.nosync/tmp:
 	mkdir -p "$@"
@@ -34,7 +41,7 @@ build.nosync/markov.o.obj: $(wildcard plugins/markov-junior.comp/markov_junior/*
 	odin build plugins/markov-junior.comp/markov_junior -target:wasi_wasm32 -build-mode:obj --no-entry-point -o:speed -out:$@
 
 build.nosync/plugin.markov-junior.wasm: build.nosync/markov.o.obj plugins/markov-junior.comp/component.c build.nosync/markov-junior/markov_junior_plugin.c build.nosync/markov-junior/markov_junior_plugin.h build.nosync/markov-junior/markov_junior_plugin_component_type.o build.nosync/TERMS scripts/wasm-notices.py Makefile flake.lock
-	wasm32-wasip2-clang -o "$@" -mexec-model=reactor -Ibuild.nosync/markov-junior -O2 -DNDEBUG build.nosync/markov-junior/markov_junior_plugin.c plugins/markov-junior.comp/component.c build.nosync/markov.o.obj build.nosync/markov-junior/markov_junior_plugin_component_type.o -Wl,--strip-all
+	wasm32-wasip2-clang -o "$@" -mexec-model=reactor $(WASI_CFLAGS) build.nosync/markov-junior/markov_junior_plugin.c plugins/markov-junior.comp/component.c build.nosync/markov.o.obj build.nosync/markov-junior/markov_junior_plugin_component_type.o -Wl,--strip-all
 	wasm-tools strip -a "$@" -o "$@.strip"
 	mv "$@.strip" "$@"
 	$(PYTHON) scripts/wasm-notices.py embed "$@" --license build.nosync/TERMS --notice NOTICE

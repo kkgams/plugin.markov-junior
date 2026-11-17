@@ -13,6 +13,7 @@ Use the pinned Odin/C/WASI and Node toolchain: `nix develop --command make <targ
 
 | Command | Purpose |
 | --- | --- |
+| `make compile_commands.json` | Generate clangd inputs and required bindings only (no WASM build). |
 | `make build` | Compile the component with embedded complete terms. |
 | `make test` | Run existing dependency-free XML/MJIR compiler tests. |
 | `make package` | Build stable WASM, tooling ZIP, LICENSES.zip and SHA256SUMS in build.nosync/. |
@@ -25,6 +26,9 @@ Use the pinned Odin/C/WASI and Node toolchain: `nix develop --command make <targ
 The tooling ZIP retains compiler/CLI sources, model resources, domain tests, reference tooling and complete terms; no precompiled replacement is supplied. See `plugins/markov-junior.comp/MJIR.md` and its docs for the format. Compiler tests do not execute the component or establish parity. Historical Host/reference parity tools remain available but require external resources and are not standalone coverage.
 
 The local Files View browses Project files; it is not a generation demo. The first launch downloads pinned supporting Units; an existing Host is never updated implicitly. GUI/runtime execution is separately verified.
+
+Run `nix develop --offline --command make compile_commands.json` before using clangd.
+The database and index cache stay in ignored `build.nosync/`.
 
 ## API
 
