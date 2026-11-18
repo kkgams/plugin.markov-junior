@@ -13,12 +13,12 @@ run_one_node :: proc(g: ^Grid, rules: []Rule, random: ^MJRandom, steps: int) -> 
 	defer delete(matches)
 	match_mask := make([][]bool, len(rules))
 	defer {
-		for i in 0..<len(match_mask) {
+		for i in 0 ..< len(match_mask) {
 			if match_mask[i] != nil do delete(match_mask[i])
 		}
 		delete(match_mask)
 	}
-	for r in 0..<len(rules) {
+	for r in 0 ..< len(rules) {
 		match_mask[r] = make([]bool, len(g.state))
 	}
 
@@ -52,13 +52,13 @@ run_one_node :: proc(g: ^Grid, rules: []Rule, random: ^MJRandom, steps: int) -> 
 
 one_initial_scan :: proc(g: ^Grid, rules: []Rule, matches: ^[dynamic]Match, match_mask: [][]bool) {
 	clear(matches)
-	for r in 0..<len(match_mask) {
-		for i in 0..<len(match_mask[r]) {
+	for r in 0 ..< len(match_mask) {
+		for i in 0 ..< len(match_mask[r]) {
 			match_mask[r][i] = false
 		}
 	}
 
-	for r in 0..<len(rules) {
+	for r in 0 ..< len(rules) {
 		rule := &rules[r]
 		for z := rule.imz - 1; z < g.mz; z += rule.imz {
 			for y := rule.imy - 1; y < g.my; y += rule.imy {
@@ -76,10 +76,16 @@ one_initial_scan :: proc(g: ^Grid, rules: []Rule, matches: ^[dynamic]Match, matc
 	}
 }
 
-one_add_around_changes :: proc(g: ^Grid, rules: []Rule, changes: []Cell, matches: ^[dynamic]Match, match_mask: [][]bool) {
+one_add_around_changes :: proc(
+	g: ^Grid,
+	rules: []Rule,
+	changes: []Cell,
+	matches: ^[dynamic]Match,
+	match_mask: [][]bool,
+) {
 	for c in changes {
 		value := g.state[c.x + c.y * g.mx + c.z * g.mx * g.my]
-		for r in 0..<len(rules) {
+		for r in 0 ..< len(rules) {
 			rule := &rules[r]
 			for shift in rule.ishifts[value] {
 				sx := c.x - shift.x
@@ -91,9 +97,20 @@ one_add_around_changes :: proc(g: ^Grid, rules: []Rule, changes: []Cell, matches
 	}
 }
 
-one_try_add :: proc(g: ^Grid, rules: []Rule, r, sx, sy, sz: int, matches: ^[dynamic]Match, match_mask: [][]bool) {
+one_try_add :: proc(
+	g: ^Grid,
+	rules: []Rule,
+	r, sx, sy, sz: int,
+	matches: ^[dynamic]Match,
+	match_mask: [][]bool,
+) {
 	rule := &rules[r]
-	if sx < 0 || sy < 0 || sz < 0 || sx + rule.imx > g.mx || sy + rule.imy > g.my || sz + rule.imz > g.mz {
+	if sx < 0 ||
+	   sy < 0 ||
+	   sz < 0 ||
+	   sx + rule.imx > g.mx ||
+	   sy + rule.imy > g.my ||
+	   sz + rule.imz > g.mz {
 		return
 	}
 	si := sx + sy * g.mx + sz * g.mx * g.my
@@ -104,9 +121,9 @@ one_try_add :: proc(g: ^Grid, rules: []Rule, r, sx, sy, sz: int, matches: ^[dyna
 }
 
 one_apply :: proc(g: ^Grid, rule: ^Rule, x, y, z: int, changes: ^[dynamic]Cell) {
-	for dz in 0..<rule.omz {
-		for dy in 0..<rule.omy {
-			for dx in 0..<rule.omx {
+	for dz in 0 ..< rule.omz {
+		for dy in 0 ..< rule.omy {
+			for dx in 0 ..< rule.omx {
 				new_value := rule.output[dx + dy * rule.omx + dz * rule.omx * rule.omy]
 				if new_value != 0xff {
 					sx := x + dx

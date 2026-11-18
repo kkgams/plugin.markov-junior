@@ -13,7 +13,7 @@ main :: proc() {
 	steps := -1
 	model_index := -1
 
-	for i in 1..<len(os.args) {
+	for i in 1 ..< len(os.args) {
 		arg := os.args[i]
 		if strings.has_prefix(arg, "--amount=") {
 			parsed, ok := strconv.parse_int(arg[9:])
@@ -49,11 +49,30 @@ main :: proc() {
 	fmt.println("Deterministic MJRandom test vector:")
 
 	r := mj_random_init(42)
-	fmt.printf("seed 42 Next: %d %d %d %d %d\n", mj_random_next(&r), mj_random_next(&r), mj_random_next(&r), mj_random_next(&r), mj_random_next(&r))
+	fmt.printf(
+		"seed 42 Next: %d %d %d %d %d\n",
+		mj_random_next(&r),
+		mj_random_next(&r),
+		mj_random_next(&r),
+		mj_random_next(&r),
+		mj_random_next(&r),
+	)
 
 	r = mj_random_init(42)
-	fmt.printf("seed 42 Next(10): %d %d %d %d %d\n", mj_random_next_max(&r, 10), mj_random_next_max(&r, 10), mj_random_next_max(&r, 10), mj_random_next_max(&r, 10), mj_random_next_max(&r, 10))
+	fmt.printf(
+		"seed 42 Next(10): %d %d %d %d %d\n",
+		mj_random_next_max(&r, 10),
+		mj_random_next_max(&r, 10),
+		mj_random_next_max(&r, 10),
+		mj_random_next_max(&r, 10),
+		mj_random_next_max(&r, 10),
+	)
 
 	r = mj_random_init(42)
-	fmt.printf("seed 42 Double: %.17g %.17g %.17g\n", mj_random_next_f64(&r), mj_random_next_f64(&r), mj_random_next_f64(&r))
+	fmt.printf(
+		"seed 42 Double: %.17g %.17g %.17g\n",
+		mj_random_next_f64(&r),
+		mj_random_next_f64(&r),
+		mj_random_next_f64(&r),
+	)
 }

@@ -5,21 +5,31 @@ import "core:fmt"
 import "core:strconv"
 
 Model_Config :: struct {
-	name:   string,
-	mx:     int,
-	my:     int,
-	mz:     int,
-	steps:  int,
+	name:  string,
+	mx:    int,
+	my:    int,
+	mz:    int,
+	steps: int,
 }
 
-xml_attr :: proc(doc: ^xml.Document, id: xml.Element_ID, key: string, default: string = "") -> string {
+xml_attr :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	key: string,
+	default: string = "",
+) -> string {
 	if value, ok := xml.find_attribute_val_by_key(doc, id, key); ok {
 		return value
 	}
 	return default
 }
 
-xml_attr_bool :: proc(doc: ^xml.Document, id: xml.Element_ID, key: string, default := false) -> bool {
+xml_attr_bool :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	key: string,
+	default := false,
+) -> bool {
 	value := xml_attr(doc, id, key, "")
 	if value == "" do return default
 	return value == "True" || value == "true"
@@ -51,7 +61,7 @@ load_model_config :: proc(name: string, model_index := -1) -> (Model_Config, boo
 	defer xml.destroy(doc)
 
 	matching_index := 0
-	for id in 0..<len(doc.elements) {
+	for id in 0 ..< len(doc.elements) {
 		e := doc.elements[id]
 		if e.ident != "model" do continue
 		if xml_attr(doc, xml.Element_ID(id), "name") != name do continue
@@ -77,7 +87,14 @@ load_model_config :: proc(name: string, model_index := -1) -> (Model_Config, boo
 	return {}, false
 }
 
-run_xml_one_model :: proc(model_name: string, amount: int, output_folder: string, format: string, force_steps := -1, model_index := -1) -> bool {
+run_xml_one_model :: proc(
+	model_name: string,
+	amount: int,
+	output_folder: string,
+	format: string,
+	force_steps := -1,
+	model_index := -1,
+) -> bool {
 	config, ok := load_model_config(model_name, model_index)
 	if !ok {
 		fmt.printf("unknown model %s\n", model_name)
@@ -98,7 +115,15 @@ run_xml_one_model :: proc(model_name: string, amount: int, output_folder: string
 
 	root := xml.Element_ID(0)
 	root_kind := doc.elements[root].ident
-	if root_kind != "one" && root_kind != "all" && root_kind != "prl" && root_kind != "path" && root_kind != "convolution" && root_kind != "convchain" && root_kind != "wfc" && root_kind != "sequence" && root_kind != "markov" {
+	if root_kind != "one" &&
+	   root_kind != "all" &&
+	   root_kind != "prl" &&
+	   root_kind != "path" &&
+	   root_kind != "convolution" &&
+	   root_kind != "convchain" &&
+	   root_kind != "wfc" &&
+	   root_kind != "sequence" &&
+	   root_kind != "markov" {
 		return false
 	}
 
@@ -106,7 +131,7 @@ run_xml_one_model :: proc(model_name: string, amount: int, output_folder: string
 	origin := xml_attr_bool(doc, root, "origin")
 
 	meta := mj_random_init(0)
-	for k in 0..<amount {
+	for k in 0 ..< amount {
 		seed := mj_random_next(&meta)
 		random := mj_random_init(seed)
 		g := grid_init(config.mx, config.my, config.mz, values, origin)
@@ -118,7 +143,14 @@ run_xml_one_model :: proc(model_name: string, amount: int, output_folder: string
 			run_xml_element(doc, root, &g, &random, config.steps)
 		}
 		if format == "text" {
-			write_state_text(fmt.tprintf("%s/%s_%d.txt", output_folder, model_name, seed), g.state, g.mx, g.my, g.mz, g.characters)
+			write_state_text(
+				fmt.tprintf("%s/%s_%d.txt", output_folder, model_name, seed),
+				g.state,
+				g.mx,
+				g.my,
+				g.mz,
+				g.characters,
+			)
 		}
 		grid_destroy(&g)
 		fmt.printf("%s > DONE\n", model_name)
@@ -128,7 +160,20 @@ run_xml_one_model :: proc(model_name: string, amount: int, output_folder: string
 
 persistent_supported_tree :: proc(doc: ^xml.Document, id: xml.Element_ID) -> bool {
 	kind := doc.elements[id].ident
-	if kind != "one" && kind != "all" && kind != "prl" && kind != "path" && kind != "convolution" && kind != "convchain" && kind != "wfc" && kind != "map" && kind != "markov" && kind != "sequence" && kind != "rule" && kind != "union" && kind != "field" && kind != "observe" {
+	if kind != "one" &&
+	   kind != "all" &&
+	   kind != "prl" &&
+	   kind != "path" &&
+	   kind != "convolution" &&
+	   kind != "convchain" &&
+	   kind != "wfc" &&
+	   kind != "map" &&
+	   kind != "markov" &&
+	   kind != "sequence" &&
+	   kind != "rule" &&
+	   kind != "union" &&
+	   kind != "field" &&
+	   kind != "observe" {
 		return false
 	}
 	for value in doc.elements[id].value {
@@ -158,7 +203,13 @@ load_unions :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid) {
 	}
 }
 
-run_xml_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, random: ^MJRandom, default_steps: int) -> bool {
+run_xml_element :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	g: ^Grid,
+	random: ^MJRandom,
+	default_steps: int,
+) -> bool {
 	kind := doc.elements[id].ident
 	if kind == "sequence" {
 		for value in doc.elements[id].value {
@@ -168,7 +219,15 @@ run_xml_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, random
 				if child_kind == "union" {
 					continue
 				}
-				if child_kind == "one" || child_kind == "all" || child_kind == "prl" || child_kind == "path" || child_kind == "convolution" || child_kind == "convchain" || child_kind == "wfc" || child_kind == "sequence" || child_kind == "markov" {
+				if child_kind == "one" ||
+				   child_kind == "all" ||
+				   child_kind == "prl" ||
+				   child_kind == "path" ||
+				   child_kind == "convolution" ||
+				   child_kind == "convchain" ||
+				   child_kind == "wfc" ||
+				   child_kind == "sequence" ||
+				   child_kind == "markov" {
 					run_xml_element(doc, child_id, g, random, default_steps)
 				}
 			}
@@ -208,7 +267,7 @@ run_xml_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, random
 
 	rules_dyn := make([dynamic]Rule)
 	defer {
-		for i in 0..<len(rules_dyn) {
+		for i in 0 ..< len(rules_dyn) {
 			rule_destroy(&rules_dyn[i])
 		}
 		delete(rules_dyn)
@@ -229,7 +288,13 @@ run_xml_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, random
 	}
 }
 
-run_markov_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, random: ^MJRandom, default_steps: int) -> bool {
+run_markov_element :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	g: ^Grid,
+	random: ^MJRandom,
+	default_steps: int,
+) -> bool {
 	steps := xml_attr_int(doc, id, "steps", 0)
 	if steps == 0 && id == 0 {
 		steps = default_steps
@@ -245,7 +310,11 @@ run_markov_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, ran
 				if child_kind == "union" {
 					continue
 				}
-				if child_kind == "one" || child_kind == "all" || child_kind == "prl" || child_kind == "sequence" || child_kind == "markov" {
+				if child_kind == "one" ||
+				   child_kind == "all" ||
+				   child_kind == "prl" ||
+				   child_kind == "sequence" ||
+				   child_kind == "markov" {
 					if run_xml_element_step(doc, child_id, g, random) {
 						changed = true
 						break
@@ -260,7 +329,12 @@ run_markov_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, ran
 	return changed_any
 }
 
-run_xml_element_step :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, random: ^MJRandom) -> bool {
+run_xml_element_step :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	g: ^Grid,
+	random: ^MJRandom,
+) -> bool {
 	kind := doc.elements[id].ident
 	if kind == "markov" {
 		for value in doc.elements[id].value {
@@ -277,7 +351,11 @@ run_xml_element_step :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, r
 			case xml.Element_ID:
 				child_kind := doc.elements[child_id].ident
 				if child_kind == "union" do continue
-				if child_kind == "one" || child_kind == "all" || child_kind == "prl" || child_kind == "sequence" || child_kind == "markov" {
+				if child_kind == "one" ||
+				   child_kind == "all" ||
+				   child_kind == "prl" ||
+				   child_kind == "sequence" ||
+				   child_kind == "markov" {
 					if !run_xml_element(doc, child_id, g, random, 0) do return false
 				}
 			}
@@ -288,7 +366,7 @@ run_xml_element_step :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, r
 
 	rules_dyn := make([dynamic]Rule)
 	defer {
-		for i in 0..<len(rules_dyn) {
+		for i in 0 ..< len(rules_dyn) {
 			rule_destroy(&rules_dyn[i])
 		}
 		delete(rules_dyn)
@@ -299,7 +377,13 @@ run_xml_element_step :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, r
 	return run_parallel_node(g, rules_dyn[:], random, 1)
 }
 
-load_rules_for_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, rules: ^[dynamic]Rule, parent_symmetry := "") {
+load_rules_for_element :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	g: ^Grid,
+	rules: ^[dynamic]Rule,
+	parent_symmetry := "",
+) {
 	in_root := xml_attr(doc, id, "in", "")
 	out_root := xml_attr(doc, id, "out", "")
 	file_root := xml_attr(doc, id, "file", "")
@@ -307,7 +391,21 @@ load_rules_for_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid,
 	fout_root := xml_attr(doc, id, "fout", "")
 	legend_root := xml_attr(doc, id, "legend", "")
 	if file_root != "" || (in_root != "" && out_root != "") || fin_root != "" || fout_root != "" {
-		append_rule_symmetries(g, rules, rule_init_mixed(g, in_root, out_root, fin_root, fout_root, file_root, legend_root, xml_attr_f64(doc, id, "p", 1.0)), xml_attr(doc, id, "symmetry", parent_symmetry))
+		append_rule_symmetries(
+			g,
+			rules,
+			rule_init_mixed(
+				g,
+				in_root,
+				out_root,
+				fin_root,
+				fout_root,
+				file_root,
+				legend_root,
+				xml_attr_f64(doc, id, "p", 1.0),
+			),
+			xml_attr(doc, id, "symmetry", parent_symmetry),
+		)
 		return
 	}
 
@@ -315,8 +413,27 @@ load_rules_for_element :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid,
 		#partial switch child_id in value {
 		case xml.Element_ID:
 			if doc.elements[child_id].ident == "rule" {
-				symmetry := xml_attr(doc, child_id, "symmetry", xml_attr(doc, id, "symmetry", parent_symmetry))
-				append_rule_symmetries(g, rules, rule_init_mixed(g, xml_attr(doc, child_id, "in", ""), xml_attr(doc, child_id, "out", ""), xml_attr(doc, child_id, "fin", ""), xml_attr(doc, child_id, "fout", ""), xml_attr(doc, child_id, "file", ""), xml_attr(doc, child_id, "legend", ""), xml_attr_f64(doc, child_id, "p", 1.0)), symmetry)
+				symmetry := xml_attr(
+					doc,
+					child_id,
+					"symmetry",
+					xml_attr(doc, id, "symmetry", parent_symmetry),
+				)
+				append_rule_symmetries(
+					g,
+					rules,
+					rule_init_mixed(
+						g,
+						xml_attr(doc, child_id, "in", ""),
+						xml_attr(doc, child_id, "out", ""),
+						xml_attr(doc, child_id, "fin", ""),
+						xml_attr(doc, child_id, "fout", ""),
+						xml_attr(doc, child_id, "file", ""),
+						xml_attr(doc, child_id, "legend", ""),
+						xml_attr_f64(doc, child_id, "p", 1.0),
+					),
+					symmetry,
+				)
 			}
 		}
 	}

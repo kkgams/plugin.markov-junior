@@ -1,9 +1,9 @@
 package markov_junior
 
-import "core:strings"
 import "core:fmt"
-import "core:os"
 import "core:image/png"
+import "core:os"
+import "core:strings"
 
 Shift :: struct {
 	x, y, z: int,
@@ -21,18 +21,18 @@ Rule :: struct {
 }
 
 Pattern :: struct {
-	data: []u8,
+	data:       []u8,
 	mx, my, mz: int,
 }
 
 rule_destroy :: proc(r: ^Rule) {
 	if r.input != nil do delete(r.input)
 	if r.output != nil do delete(r.output)
-	for i in 0..<len(r.ishifts) {
+	for i in 0 ..< len(r.ishifts) {
 		if r.ishifts[i] != nil do delete(r.ishifts[i])
 	}
 	if r.ishifts != nil do delete(r.ishifts)
-	for i in 0..<len(r.oshifts) {
+	for i in 0 ..< len(r.oshifts) {
 		if r.oshifts[i] != nil do delete(r.oshifts[i])
 	}
 	if r.oshifts != nil do delete(r.oshifts)
@@ -48,13 +48,18 @@ parse_pattern :: proc(s: string) -> Pattern {
 	delete(rows0)
 	mz := len(layers)
 
-	p := Pattern{data = make([]u8, mx * my * mz), mx = mx, my = my, mz = mz}
-	for z in 0..<mz {
+	p := Pattern {
+		data = make([]u8, mx * my * mz),
+		mx   = mx,
+		my   = my,
+		mz   = mz,
+	}
+	for z in 0 ..< mz {
 		layer := layers[mz - 1 - z]
 		rows := strings.split(layer, "/")
-		for y in 0..<my {
+		for y in 0 ..< my {
 			row := rows[y]
-			for x in 0..<mx {
+			for x in 0 ..< mx {
 				p.data[x + y * mx + z * mx * my] = row[x]
 			}
 		}
@@ -77,22 +82,42 @@ resource_path :: proc(g: ^Grid, name: string) -> string {
 	return fmt.tprintf("resources/rules/%s.vox", name)
 }
 
-rule_init_mixed :: proc(g: ^Grid, in_string, out_string, fin, fout, file, legend: string, probability := 1.0) -> Rule {
+rule_init_mixed :: proc(
+	g: ^Grid,
+	in_string, out_string, fin, fout, file, legend: string,
+	probability := 1.0,
+) -> Rule {
 	return rule_init_mixed_grids(g, g, in_string, out_string, fin, fout, file, legend, probability)
 }
 
-rule_init_mixed_grids :: proc(gin, gout: ^Grid, in_string, out_string, fin, fout, file, legend: string, probability := 1.0) -> Rule {
+rule_init_mixed_grids :: proc(
+	gin, gout: ^Grid,
+	in_string, out_string, fin, fout, file, legend: string,
+	probability := 1.0,
+) -> Rule {
 	if file != "" {
 		p := load_resource_pattern(gout, file, legend)
 		defer pattern_destroy(&p)
 		half := p.mx / 2
 		input_chars := make([]u8, half * p.my * p.mz)
 		output_chars := make([]u8, half * p.my * p.mz)
-		for z in 0..<p.mz do for y in 0..<p.my do for x in 0..<half {
+		for z in 0 ..< p.mz do for y in 0 ..< p.my do for x in 0 ..< half {
 			input_chars[x + y * half + z * half * p.my] = p.data[x + y * p.mx + z * p.mx * p.my]
 			output_chars[x + y * half + z * half * p.my] = p.data[x + half + y * p.mx + z * p.mx * p.my]
 		}
-		return rule_from_char_arrays_grids(gin, gout, input_chars, half, p.my, p.mz, output_chars, half, p.my, p.mz, probability)
+		return rule_from_char_arrays_grids(
+			gin,
+			gout,
+			input_chars,
+			half,
+			p.my,
+			p.mz,
+			output_chars,
+			half,
+			p.my,
+			p.mz,
+			probability,
+		)
 	}
 
 	pin: Pattern
@@ -109,27 +134,65 @@ rule_init_mixed_grids :: proc(gin, gout: ^Grid, in_string, out_string, fin, fout
 		pout = load_resource_pattern(gout, fout, legend)
 	}
 	defer pattern_destroy(&pout)
-	return rule_from_char_arrays_grids(gin, gout, pin.data, pin.mx, pin.my, pin.mz, pout.data, pout.mx, pout.my, pout.mz, probability)
+	return rule_from_char_arrays_grids(
+		gin,
+		gout,
+		pin.data,
+		pin.mx,
+		pin.my,
+		pin.mz,
+		pout.data,
+		pout.mx,
+		pout.my,
+		pout.mz,
+		probability,
+	)
 }
 
-rule_from_char_arrays :: proc(g: ^Grid, in_chars: []u8, imx, imy, imz: int, out_chars: []u8, omx, omy, omz: int, probability := 1.0) -> Rule {
-	return rule_from_char_arrays_grids(g, g, in_chars, imx, imy, imz, out_chars, omx, omy, omz, probability)
+rule_from_char_arrays :: proc(
+	g: ^Grid,
+	in_chars: []u8,
+	imx, imy, imz: int,
+	out_chars: []u8,
+	omx, omy, omz: int,
+	probability := 1.0,
+) -> Rule {
+	return rule_from_char_arrays_grids(
+		g,
+		g,
+		in_chars,
+		imx,
+		imy,
+		imz,
+		out_chars,
+		omx,
+		omy,
+		omz,
+		probability,
+	)
 }
 
 rule_input_symbol_known :: proc(g: ^Grid, ch: u8) -> bool {
 	if ch == '*' do return true
 	if grid_value(g, ch) != 0xff do return true
-	for i in 0..<len(g.union_keys) do if g.union_keys[i] == ch do return true
+	for i in 0 ..< len(g.union_keys) do if g.union_keys[i] == ch do return true
 	return false
 }
 
-rule_from_char_arrays_grids :: proc(gin, gout: ^Grid, in_chars: []u8, imx, imy, imz: int, out_chars: []u8, omx, omy, omz: int, probability := 1.0) -> Rule {
+rule_from_char_arrays_grids :: proc(
+	gin, gout: ^Grid,
+	in_chars: []u8,
+	imx, imy, imz: int,
+	out_chars: []u8,
+	omx, omy, omz: int,
+	probability := 1.0,
+) -> Rule {
 	for ch in in_chars do if !rule_input_symbol_known(gin, ch) do return {}
 	for ch in out_chars do if ch != '*' && grid_value(gout, ch) == 0xff do return {}
 	input := make([]i32, len(in_chars))
 	output := make([]u8, len(out_chars))
-	for i in 0..<len(in_chars) do input[i] = grid_wave(gin, in_chars[i])
-	for i in 0..<len(out_chars) {
+	for i in 0 ..< len(in_chars) do input[i] = grid_wave(gin, in_chars[i])
+	for i in 0 ..< len(out_chars) {
 		ch := out_chars[i]
 		if ch == '*' {
 			output[i] = 0xff
@@ -151,20 +214,29 @@ load_png_pattern :: proc(path, legend: string) -> Pattern {
 		return {}
 	}
 	defer png.destroy(img)
-	p := Pattern{data = make([]u8, img.width * img.height), mx = img.width, my = img.height, mz = 1}
+	p := Pattern {
+		data = make([]u8, img.width * img.height),
+		mx   = img.width,
+		my   = img.height,
+		mz   = 1,
+	}
 	uniques := make([dynamic]u32)
 	defer delete(uniques)
 	pixels := img.pixels.buf[:]
 	channels := img.channels
-	for y in 0..<img.height {
-		for x in 0..<img.width {
+	for y in 0 ..< img.height {
+		for x in 0 ..< img.width {
 			i := (x + y * img.width) * channels
 			color: u32 = 0
 			if channels >= 3 {
 				a: u32 = 0xff
 				if channels >= 4 do a = u32(pixels[i + 3])
 				// Match C# ImageSharp Bgra32 copied to int: AARRGGBB.
-				color = (a << 24) | (u32(pixels[i]) << 16) | (u32(pixels[i + 1]) << 8) | u32(pixels[i + 2])
+				color =
+					(a << 24) |
+					(u32(pixels[i]) << 16) |
+					(u32(pixels[i + 1]) << 8) |
+					u32(pixels[i + 2])
 			} else if channels == 1 {
 				v := u32(pixels[i])
 				color = 0xff000000 | (v << 16) | (v << 8) | v
@@ -177,7 +249,7 @@ load_png_pattern :: proc(path, legend: string) -> Pattern {
 }
 
 resource_ord :: proc(uniques: ^[dynamic]u32, color: u32) -> int {
-	for i in 0..<len(uniques) {
+	for i in 0 ..< len(uniques) {
 		if uniques[i] == color do return i
 	}
 	append(uniques, color)
@@ -185,7 +257,12 @@ resource_ord :: proc(uniques: ^[dynamic]u32, color: u32) -> int {
 }
 
 le_i32 :: proc(data: []u8, off: int) -> int {
-	return int(data[off]) | (int(data[off + 1]) << 8) | (int(data[off + 2]) << 16) | (int(data[off + 3]) << 24)
+	return(
+		int(data[off]) |
+		(int(data[off + 1]) << 8) |
+		(int(data[off + 2]) << 16) |
+		(int(data[off + 3]) << 24) \
+	)
 }
 
 load_vox_pattern :: proc(path, legend: string) -> Pattern {
@@ -207,21 +284,28 @@ load_vox_pattern :: proc(path, legend: string) -> Pattern {
 			mz = le_i32(data, off + 8)
 		} else if id == "XYZI" && mx > 0 && my > 0 && mz > 0 && off + 4 <= len(data) {
 			colors = make([]i32, mx * my * mz)
-			for i in 0..<len(colors) do colors[i] = -1
+			for i in 0 ..< len(colors) do colors[i] = -1
 			n := le_i32(data, off)
 			pos := off + 4
-			for i in 0..<n {
-				x := int(data[pos]); y := int(data[pos + 1]); z := int(data[pos + 2]); c := i32(data[pos + 3]); pos += 4
+			for i in 0 ..< n {
+				x := int(
+					data[pos],
+				); y := int(data[pos + 1]); z := int(data[pos + 2]); c := i32(data[pos + 3]); pos += 4
 				colors[x + y * mx + z * mx * my] = c
 			}
 		}
 		off += chunk_size
 	}
 	if colors == nil do return {}
-	p := Pattern{data = make([]u8, mx * my * mz), mx = mx, my = my, mz = mz}
+	p := Pattern {
+		data = make([]u8, mx * my * mz),
+		mx   = mx,
+		my   = my,
+		mz   = mz,
+	}
 	uniques := make([dynamic]u32)
 	defer delete(uniques)
-	for i in 0..<len(colors) {
+	for i in 0 ..< len(colors) {
 		ord := resource_ord(&uniques, u32(colors[i]))
 		p.data[i] = legend[ord]
 	}
@@ -237,10 +321,10 @@ rule_init :: proc(g: ^Grid, in_string, out_string: string, probability := 1.0) -
 	input := make([]i32, len(pin.data))
 	output := make([]u8, len(pout.data))
 
-	for i in 0..<len(pin.data) {
+	for i in 0 ..< len(pin.data) {
 		input[i] = grid_wave(g, pin.data[i])
 	}
-	for i in 0..<len(pout.data) {
+	for i in 0 ..< len(pout.data) {
 		ch := pout.data[i]
 		if ch == '*' {
 			output[i] = 0xff
@@ -249,24 +333,46 @@ rule_init :: proc(g: ^Grid, in_string, out_string: string, probability := 1.0) -
 		}
 	}
 
-	return rule_from_arrays(g, input, pin.mx, pin.my, pin.mz, output, pout.mx, pout.my, pout.mz, probability)
+	return rule_from_arrays(
+		g,
+		input,
+		pin.mx,
+		pin.my,
+		pin.mz,
+		output,
+		pout.mx,
+		pout.my,
+		pout.mz,
+		probability,
+	)
 }
 
-rule_from_arrays :: proc(g: ^Grid, input: []i32, imx, imy, imz: int, output: []u8, omx, omy, omz: int, probability := 1.0) -> Rule {
-	r := Rule{
-		imx = imx, imy = imy, imz = imz,
-		omx = omx, omy = omy, omz = omz,
-		input = input,
-		output = output,
+rule_from_arrays :: proc(
+	g: ^Grid,
+	input: []i32,
+	imx, imy, imz: int,
+	output: []u8,
+	omx, omy, omz: int,
+	probability := 1.0,
+) -> Rule {
+	r := Rule {
+		imx     = imx,
+		imy     = imy,
+		imz     = imz,
+		omx     = omx,
+		omy     = omy,
+		omz     = omz,
+		input   = input,
+		output  = output,
 		ishifts = make([][]Shift, len(g.characters)),
-		p = probability,
+		p       = probability,
 	}
 
-	for c in 0..<len(g.characters) {
+	for c in 0 ..< len(g.characters) {
 		list := make([dynamic]Shift)
-		for z in 0..<r.imz {
-			for y in 0..<r.imy {
-				for x in 0..<r.imx {
+		for z in 0 ..< r.imz {
+			for y in 0 ..< r.imy {
+				for x in 0 ..< r.imx {
 					i := x + y * r.imx + z * r.imx * r.imy
 					w := r.input[i]
 					if (w & (i32(1) << uint(c))) != 0 {
@@ -282,9 +388,9 @@ rule_from_arrays :: proc(g: ^Grid, input: []i32, imx, imy, imz: int, output: []u
 
 	if omx == imx && omy == imy && omz == imz {
 		r.oshifts = make([][]Shift, len(g.characters))
-		for c in 0..<len(g.characters) {
+		for c in 0 ..< len(g.characters) {
 			list := make([dynamic]Shift)
-			for z in 0..<r.omz do for y in 0..<r.omy do for x in 0..<r.omx {
+			for z in 0 ..< r.omz do for y in 0 ..< r.omy do for x in 0 ..< r.omx {
 				i := x + y * r.omx + z * r.omx * r.omy
 				o := r.output[i]
 				if o != 0xff {
@@ -301,13 +407,13 @@ rule_from_arrays :: proc(g: ^Grid, input: []i32, imx, imy, imz: int, output: []u
 
 	wildcard := (i32(1) << uint(len(g.characters))) - 1
 	r.binput = make([]u8, len(r.input))
-	for i in 0..<len(r.input) {
+	for i in 0 ..< len(r.input) {
 		w := r.input[i]
 		if w == wildcard {
 			r.binput[i] = 0xff
 		} else {
-			for c in 0..<len(g.characters) {
-				if (w & (i32(1) << uint(c))) != 0 { r.binput[i] = u8(c); break }
+			for c in 0 ..< len(g.characters) {
+				if (w & (i32(1) << uint(c))) != 0 {r.binput[i] = u8(c); break}
 			}
 		}
 	}
@@ -324,19 +430,21 @@ rule_clone :: proc(g: ^Grid, r: ^Rule) -> Rule {
 
 rule_z_rotated :: proc(g: ^Grid, r: ^Rule) -> Rule {
 	input := make([]i32, len(r.input))
-	for z in 0..<r.imz {
-		for y in 0..<r.imx {
-			for x in 0..<r.imy {
-				input[x + y * r.imy + z * r.imx * r.imy] = r.input[r.imx - 1 - y + x * r.imx + z * r.imx * r.imy]
+	for z in 0 ..< r.imz {
+		for y in 0 ..< r.imx {
+			for x in 0 ..< r.imy {
+				input[x + y * r.imy + z * r.imx * r.imy] =
+					r.input[r.imx - 1 - y + x * r.imx + z * r.imx * r.imy]
 			}
 		}
 	}
 
 	output := make([]u8, len(r.output))
-	for z in 0..<r.omz {
-		for y in 0..<r.omx {
-			for x in 0..<r.omy {
-				output[x + y * r.omy + z * r.omx * r.omy] = r.output[r.omx - 1 - y + x * r.omx + z * r.omx * r.omy]
+	for z in 0 ..< r.omz {
+		for y in 0 ..< r.omx {
+			for x in 0 ..< r.omy {
+				output[x + y * r.omy + z * r.omx * r.omy] =
+					r.output[r.omx - 1 - y + x * r.omx + z * r.omx * r.omy]
 			}
 		}
 	}
@@ -346,19 +454,21 @@ rule_z_rotated :: proc(g: ^Grid, r: ^Rule) -> Rule {
 
 rule_y_rotated :: proc(g: ^Grid, r: ^Rule) -> Rule {
 	input := make([]i32, len(r.input))
-	for z in 0..<r.imx {
-		for y in 0..<r.imy {
-			for x in 0..<r.imz {
-				input[x + y * r.imz + z * r.imz * r.imy] = r.input[r.imx - 1 - z + y * r.imx + x * r.imx * r.imy]
+	for z in 0 ..< r.imx {
+		for y in 0 ..< r.imy {
+			for x in 0 ..< r.imz {
+				input[x + y * r.imz + z * r.imz * r.imy] =
+					r.input[r.imx - 1 - z + y * r.imx + x * r.imx * r.imy]
 			}
 		}
 	}
 
 	output := make([]u8, len(r.output))
-	for z in 0..<r.omx {
-		for y in 0..<r.omy {
-			for x in 0..<r.omz {
-				output[x + y * r.omz + z * r.omz * r.omy] = r.output[r.omx - 1 - z + y * r.omx + x * r.omx * r.omy]
+	for z in 0 ..< r.omx {
+		for y in 0 ..< r.omy {
+			for x in 0 ..< r.omz {
+				output[x + y * r.omz + z * r.omz * r.omy] =
+					r.output[r.omx - 1 - z + y * r.omx + x * r.omx * r.omy]
 			}
 		}
 	}
@@ -368,19 +478,21 @@ rule_y_rotated :: proc(g: ^Grid, r: ^Rule) -> Rule {
 
 rule_reflected :: proc(g: ^Grid, r: ^Rule) -> Rule {
 	input := make([]i32, len(r.input))
-	for z in 0..<r.imz {
-		for y in 0..<r.imy {
-			for x in 0..<r.imx {
-				input[x + y * r.imx + z * r.imx * r.imy] = r.input[r.imx - 1 - x + y * r.imx + z * r.imx * r.imy]
+	for z in 0 ..< r.imz {
+		for y in 0 ..< r.imy {
+			for x in 0 ..< r.imx {
+				input[x + y * r.imx + z * r.imx * r.imy] =
+					r.input[r.imx - 1 - x + y * r.imx + z * r.imx * r.imy]
 			}
 		}
 	}
 
 	output := make([]u8, len(r.output))
-	for z in 0..<r.omz {
-		for y in 0..<r.omy {
-			for x in 0..<r.omx {
-				output[x + y * r.omx + z * r.omx * r.omy] = r.output[r.omx - 1 - x + y * r.omx + z * r.omx * r.omy]
+	for z in 0 ..< r.omz {
+		for y in 0 ..< r.omy {
+			for x in 0 ..< r.omx {
+				output[x + y * r.omx + z * r.omx * r.omy] =
+					r.output[r.omx - 1 - x + y * r.omx + z * r.omx * r.omy]
 			}
 		}
 	}
@@ -390,10 +502,10 @@ rule_reflected :: proc(g: ^Grid, r: ^Rule) -> Rule {
 
 rule_same :: proc(a, b: ^Rule) -> bool {
 	if a.imx != b.imx || a.imy != b.imy || a.imz != b.imz || a.omx != b.omx || a.omy != b.omy || a.omz != b.omz do return false
-	for i in 0..<len(a.input) {
+	for i in 0 ..< len(a.input) {
 		if a.input[i] != b.input[i] do return false
 	}
-	for i in 0..<len(a.output) {
+	for i in 0 ..< len(a.output) {
 		if a.output[i] != b.output[i] do return false
 	}
 	return true
@@ -430,13 +542,13 @@ append_square_symmetries :: proc(g: ^Grid, rules: ^[dynamic]Rule, base: Rule, sy
 	things[7] = rule_reflected(g, &things[6])
 
 	used: [8]bool
-	for i in 0..<8 {
+	for i in 0 ..< 8 {
 		if !square_symmetry_enabled(symmetry, i) {
 			rule_destroy(&things[i])
 			continue
 		}
 		duplicate := false
-		for j in 0..<i {
+		for j in 0 ..< i {
 			if used[j] && rule_same(&things[j], &things[i]) {
 				duplicate = true
 				break
@@ -513,13 +625,13 @@ append_cube_symmetries :: proc(g: ^Grid, rules: ^[dynamic]Rule, base: Rule, symm
 	s[47] = rule_reflected(g, &s[46])
 
 	used: [48]bool
-	for i in 0..<48 {
+	for i in 0 ..< 48 {
 		if !cube_symmetry_enabled(symmetry, i) {
 			rule_destroy(&s[i])
 			continue
 		}
 		duplicate := false
-		for j in 0..<i {
+		for j in 0 ..< i {
 			if used[j] && rule_same(&s[j], &s[i]) {
 				duplicate = true
 				break

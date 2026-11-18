@@ -15,12 +15,12 @@ write_state_text :: proc(path: string, state: []u8, mx: int, my: int, mz: int, l
 	fmt.sbprintf(&builder, "size %d %d %d\n", mx, my, mz)
 	fmt.sbprintf(&builder, "legend %s\n", legend)
 
-	for z in 0..<mz {
+	for z in 0 ..< mz {
 		if mz > 1 {
 			fmt.sbprintf(&builder, "z %d\n", z)
 		}
-		for y in 0..<my {
-			for x in 0..<mx {
+		for y in 0 ..< my {
+			for x in 0 ..< mx {
 				idx := x + y * mx + z * mx * my
 				fmt.sbprintf(&builder, "%c", legend[state[idx]])
 			}

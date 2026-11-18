@@ -27,48 +27,48 @@ Persistent_Kind :: enum {
 }
 
 Persistent_Node :: struct {
-	kind: Persistent_Kind,
-	rules: [dynamic]Rule,
-	children: [dynamic]^Persistent_Node,
-	parent: ^Persistent_Node,
-	n: int,
-	debug_index: int,
-	matches: [dynamic]Match,
-	match_count: int,
-	match_mask: [][]bool,
-	all_mask: []bool,
-	newstate: []u8,
-	path: Path_State,
-	convolution: Convolution_State,
-	convchain: ConvChain_State,
-	wfc: WFC_State,
-	map_state: Map_State,
-	fields: []Field_State,
-	observations: []Observation_State,
-	potentials: []int,
-	future: []i32,
-	trajectory: [][]u8,
-	search: bool,
-	limit: int,
+	kind:              Persistent_Kind,
+	rules:             [dynamic]Rule,
+	children:          [dynamic]^Persistent_Node,
+	parent:            ^Persistent_Node,
+	n:                 int,
+	debug_index:       int,
+	matches:           [dynamic]Match,
+	match_count:       int,
+	match_mask:        [][]bool,
+	all_mask:          []bool,
+	newstate:          []u8,
+	path:              Path_State,
+	convolution:       Convolution_State,
+	convchain:         ConvChain_State,
+	wfc:               WFC_State,
+	map_state:         Map_State,
+	fields:            []Field_State,
+	observations:      []Observation_State,
+	potentials:        []int,
+	future:            []i32,
+	trajectory:        [][]u8,
+	search:            bool,
+	limit:             int,
 	depth_coefficient: f64,
-	future_computed: bool,
-	temperature: f64,
+	future_computed:   bool,
+	temperature:       f64,
 	last_matched_turn: int,
-	counter: int,
-	steps: int,
+	counter:           int,
+	steps:             int,
 }
 
 persistent_node_destroy :: proc(n: ^Persistent_Node) {
-	for i in 0..<len(n.children) {
+	for i in 0 ..< len(n.children) {
 		persistent_node_destroy(n.children[i])
 		free(n.children[i])
 	}
 	if n.children != nil do delete(n.children)
-	for i in 0..<len(n.rules) do rule_destroy(&n.rules[i])
+	for i in 0 ..< len(n.rules) do rule_destroy(&n.rules[i])
 	if n.rules != nil do delete(n.rules)
 	if n.matches != nil do delete(n.matches)
 	if n.match_mask != nil {
-		for i in 0..<len(n.match_mask) {
+		for i in 0 ..< len(n.match_mask) {
 			if n.match_mask[i] != nil do delete(n.match_mask[i])
 		}
 		delete(n.match_mask)
@@ -93,19 +93,25 @@ persistent_node_reset :: proc(n: ^Persistent_Node) {
 	n.last_matched_turn = -1
 	n.match_count = 0
 	n.future_computed = false
-	if n.trajectory != nil { search_destroy_trajectory(n.trajectory); n.trajectory = nil }
+	if n.trajectory != nil {search_destroy_trajectory(n.trajectory); n.trajectory = nil}
 	if n.match_mask != nil {
-		for r in 0..<len(n.match_mask) {
-			for i in 0..<len(n.match_mask[r]) do n.match_mask[r][i] = false
+		for r in 0 ..< len(n.match_mask) {
+			for i in 0 ..< len(n.match_mask[r]) do n.match_mask[r][i] = false
 		}
 	}
 	if n.all_mask != nil {
-		for i in 0..<len(n.all_mask) do n.all_mask[i] = false
+		for i in 0 ..< len(n.all_mask) do n.all_mask[i] = false
 	}
 	for child in n.children do persistent_node_reset(child)
 }
 
-persistent_load_node :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, debug_counter: ^int, parent_symmetry := "") -> ^Persistent_Node {
+persistent_load_node :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	g: ^Grid,
+	debug_counter: ^int,
+	parent_symmetry := "",
+) -> ^Persistent_Node {
 	kind_string := doc.elements[id].ident
 	n := new(Persistent_Node)
 	n.debug_index = debug_counter^
@@ -153,7 +159,7 @@ persistent_load_node :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, d
 		load_rules_for_element(doc, id, g, &n.rules, parent_symmetry)
 		if n.kind != .Prl {
 			n.match_mask = make([][]bool, len(n.rules))
-			for r in 0..<len(n.rules) do n.match_mask[r] = make([]bool, len(g.state))
+			for r in 0 ..< len(n.rules) do n.match_mask[r] = make([]bool, len(g.state))
 		}
 		if n.kind == .All do n.all_mask = make([]bool, len(g.state))
 		if n.kind == .Prl do n.newstate = make([]u8, len(g.state))
@@ -165,7 +171,12 @@ persistent_load_node :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, d
 	return n
 }
 
-persistent_load_fields_and_observations :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, n: ^Persistent_Node) {
+persistent_load_fields_and_observations :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	g: ^Grid,
+	n: ^Persistent_Node,
+) {
 	n.temperature = xml_attr_f64(doc, id, "temperature", 0.0)
 	for value in doc.elements[id].value {
 		#partial switch child_id in value {
@@ -193,12 +204,28 @@ persistent_load_fields_and_observations :: proc(doc: ^xml.Document, id: xml.Elem
 	}
 }
 
-persistent_load_children :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid, n: ^Persistent_Node, debug_counter: ^int, parent_symmetry: string) {
+persistent_load_children :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	g: ^Grid,
+	n: ^Persistent_Node,
+	debug_counter: ^int,
+	parent_symmetry: string,
+) {
 	for value in doc.elements[id].value {
 		#partial switch child_id in value {
 		case xml.Element_ID:
 			child_kind := doc.elements[child_id].ident
-			if child_kind == "one" || child_kind == "all" || child_kind == "prl" || child_kind == "path" || child_kind == "convolution" || child_kind == "convchain" || child_kind == "wfc" || child_kind == "map" || child_kind == "markov" || child_kind == "sequence" {
+			if child_kind == "one" ||
+			   child_kind == "all" ||
+			   child_kind == "prl" ||
+			   child_kind == "path" ||
+			   child_kind == "convolution" ||
+			   child_kind == "convchain" ||
+			   child_kind == "wfc" ||
+			   child_kind == "map" ||
+			   child_kind == "markov" ||
+			   child_kind == "sequence" {
 				child := persistent_load_node(doc, child_id, g, debug_counter, parent_symmetry)
 				if child != nil {
 					if child.kind == .Map || child.kind == .WFC {
@@ -213,7 +240,13 @@ persistent_load_children :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Gri
 	}
 }
 
-run_persistent_markov_root :: proc(doc: ^xml.Document, root: xml.Element_ID, g: ^Grid, random: ^MJRandom, steps: int) -> bool {
+run_persistent_markov_root :: proc(
+	doc: ^xml.Document,
+	root: xml.Element_ID,
+	g: ^Grid,
+	random: ^MJRandom,
+	steps: int,
+) -> bool {
 	debug_counter := 0
 	root_node := persistent_load_node(doc, root, g, &debug_counter)
 	if root_node == nil do return false
@@ -251,7 +284,13 @@ persistent_apply_csharp_tile_wfc_output_timing :: proc(n: ^Persistent_Node, g: ^
 	return false
 }
 
-persistent_node_go :: proc(n: ^Persistent_Node, current: ^^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx: ^Exec_Context) -> bool {
+persistent_node_go :: proc(
+	n: ^Persistent_Node,
+	current: ^^Persistent_Node,
+	g: ^Grid,
+	random: ^MJRandom,
+	ctx: ^Exec_Context,
+) -> bool {
 	switch n.kind {
 	case .One:
 		return persistent_one_go(n, g, random, ctx)
@@ -323,13 +362,17 @@ persistent_node_go :: proc(n: ^Persistent_Node, current: ^^Persistent_Node, g: ^
 }
 
 
-
-persistent_prl_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx: ^Exec_Context) -> bool {
+persistent_prl_go :: proc(
+	n: ^Persistent_Node,
+	g: ^Grid,
+	random: ^MJRandom,
+	ctx: ^Exec_Context,
+) -> bool {
 	if len(n.rules) == 0 do return false
 	if n.steps > 0 && n.counter >= n.steps do return false
 	n.match_count = 0
 
-	for r in 0..<len(n.rules) {
+	for r in 0 ..< len(n.rules) {
 		rule := &n.rules[r]
 		for z := rule.imz - 1; z < g.mz; z += rule.imz {
 			for y := rule.imy - 1; y < g.my; y += rule.imy {
@@ -357,15 +400,21 @@ persistent_prl_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx:
 	return n.match_count > 0
 }
 
-persistent_prl_try_add :: proc(g: ^Grid, n: ^Persistent_Node, r, sx, sy, sz: int, random: ^MJRandom, ctx: ^Exec_Context) {
+persistent_prl_try_add :: proc(
+	g: ^Grid,
+	n: ^Persistent_Node,
+	r, sx, sy, sz: int,
+	random: ^MJRandom,
+	ctx: ^Exec_Context,
+) {
 	rule := &n.rules[r]
 	if sx < 0 || sy < 0 || sz < 0 || sx + rule.imx > g.mx || sy + rule.imy > g.my || sz + rule.imz > g.mz do return
 	if !grid_matches(g, rule, sx, sy, sz) do return
 	if mj_random_next_f64(random) > rule.p do return
 
-	for dz in 0..<rule.omz {
-		for dy in 0..<rule.omy {
-			for dx in 0..<rule.omx {
+	for dz in 0 ..< rule.omz {
+		for dy in 0 ..< rule.omy {
+			for dx in 0 ..< rule.omx {
 				new_value := rule.output[dx + dy * rule.omx + dz * rule.omx * rule.omy]
 				idi := sx + dx + (sy + dy) * g.mx + (sz + dz) * g.mx * g.my
 				if new_value != 0xff && new_value != g.state[idi] {
@@ -384,7 +433,7 @@ persistent_rule_scan :: proc(n: ^Persistent_Node, g: ^Grid, ctx: ^Exec_Context) 
 		for ci := start; ci < len(ctx.changes); ci += 1 {
 			c := ctx.changes[ci]
 			value := g.state[c.x + c.y * g.mx + c.z * g.mx * g.my]
-			for r in 0..<len(n.rules) {
+			for r in 0 ..< len(n.rules) {
 				rule := &n.rules[r]
 				for shift in rule.ishifts[value] {
 					persistent_one_try_add(g, n, r, c.x - shift.x, c.y - shift.y, c.z - shift.z)
@@ -393,10 +442,10 @@ persistent_rule_scan :: proc(n: ^Persistent_Node, g: ^Grid, ctx: ^Exec_Context) 
 		}
 	} else {
 		n.match_count = 0
-		for r in 0..<len(n.match_mask) {
-			for i in 0..<len(n.match_mask[r]) do n.match_mask[r][i] = false
+		for r in 0 ..< len(n.match_mask) {
+			for i in 0 ..< len(n.match_mask[r]) do n.match_mask[r][i] = false
 		}
-		for r in 0..<len(n.rules) {
+		for r in 0 ..< len(n.rules) {
 			rule := &n.rules[r]
 			for z := rule.imz - 1; z < g.mz; z += rule.imz {
 				for y := rule.imy - 1; y < g.my; y += rule.imy {
@@ -412,7 +461,12 @@ persistent_rule_scan :: proc(n: ^Persistent_Node, g: ^Grid, ctx: ^Exec_Context) 
 	}
 }
 
-persistent_all_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx: ^Exec_Context) -> bool {
+persistent_all_go :: proc(
+	n: ^Persistent_Node,
+	g: ^Grid,
+	random: ^MJRandom,
+	ctx: ^Exec_Context,
+) -> bool {
 	if len(n.rules) == 0 do return false
 	if n.steps > 0 && n.counter >= n.steps do return false
 	if !persistent_compute_observations_and_fields(n, g, random) do return false
@@ -420,21 +474,26 @@ persistent_all_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx:
 	n.last_matched_turn = ctx.counter
 	if n.match_count == 0 do return false
 	if trace, ok := os.lookup_env("MJ_TRACE_BRANCH", context.temp_allocator); ok && trace == "1" {
-		fmt.eprintf("TRACE Odin turn=%d node=%d kind=all matchCount=%d\n", ctx.counter, n.debug_index, n.match_count)
+		fmt.eprintf(
+			"TRACE Odin turn=%d node=%d kind=all matchCount=%d\n",
+			ctx.counter,
+			n.debug_index,
+			n.match_count,
+		)
 	}
 
 	if n.potentials != nil {
 		persistent_all_apply_potentials(n, g, random, ctx)
 	} else {
 		shuffle := make([]int, n.match_count)
-		for i in 0..<len(shuffle) {
+		for i in 0 ..< len(shuffle) {
 			j := int(mj_random_next_max(random, i32(i + 1)))
 			shuffle[i] = shuffle[j]
 			shuffle[j] = i
 		}
 		defer delete(shuffle)
 
-		for k in 0..<len(shuffle) {
+		for k in 0 ..< len(shuffle) {
 			m := n.matches[shuffle[k]]
 			si := m.x + m.y * g.mx + m.z * g.mx * g.my
 			n.match_mask[m.r][si] = false
@@ -453,27 +512,46 @@ persistent_all_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx:
 }
 
 
-persistent_all_apply_potentials :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx: ^Exec_Context) {
-	Pair :: struct {idx: int, key: f64}
+persistent_all_apply_potentials :: proc(
+	n: ^Persistent_Node,
+	g: ^Grid,
+	random: ^MJRandom,
+	ctx: ^Exec_Context,
+) {
+	Pair :: struct {
+		idx: int,
+		key: f64,
+	}
 	list := make([dynamic]Pair)
 	defer delete(list)
 	first_h := 0
 	first_set := false
-	for m_idx in 0..<n.match_count {
+	for m_idx in 0 ..< n.match_count {
 		m := n.matches[m_idx]
-		h, ok := field_delta_pointwise(g.state, &n.rules[m.r], m.x, m.y, m.z, n.fields, n.potentials, len(g.characters), g.mx, g.my)
+		h, ok := field_delta_pointwise(
+			g.state,
+			&n.rules[m.r],
+			m.x,
+			m.y,
+			m.z,
+			n.fields,
+			n.potentials,
+			len(g.characters),
+			g.mx,
+			g.my,
+		)
 		if ok {
-			if !first_set { first_h = h; first_set = true }
+			if !first_set {first_h = h; first_set = true}
 			append(&list, Pair{m_idx, field_key(h, first_h, n.temperature, random)})
 		}
 	}
 	// stable insertion sort descending to match LINQ OrderBy(-key) for unique random keys.
-	for i in 1..<len(list) {
+	for i in 1 ..< len(list) {
 		v := list[i]
 		j := i - 1
 		for ; j >= 0 && list[j].key < v.key; j -= 1 {
 			list[j + 1] = list[j]
-			if j == 0 { j = -1; break }
+			if j == 0 {j = -1; break}
 		}
 		list[j + 1] = v
 	}
@@ -485,19 +563,25 @@ persistent_all_apply_potentials :: proc(n: ^Persistent_Node, g: ^Grid, random: ^
 	}
 }
 
-persistent_all_fit :: proc(g: ^Grid, rule: ^Rule, x, y, z: int, mask: []bool, changes: ^[dynamic]Cell) {
-	for dz in 0..<rule.omz {
-		for dy in 0..<rule.omy {
-			for dx in 0..<rule.omx {
+persistent_all_fit :: proc(
+	g: ^Grid,
+	rule: ^Rule,
+	x, y, z: int,
+	mask: []bool,
+	changes: ^[dynamic]Cell,
+) {
+	for dz in 0 ..< rule.omz {
+		for dy in 0 ..< rule.omy {
+			for dx in 0 ..< rule.omx {
 				value := rule.output[dx + dy * rule.omx + dz * rule.omx * rule.omy]
 				if value != 0xff && mask[x + dx + (y + dy) * g.mx + (z + dz) * g.mx * g.my] do return
 			}
 		}
 	}
 
-	for dz in 0..<rule.omz {
-		for dy in 0..<rule.omy {
-			for dx in 0..<rule.omx {
+	for dz in 0 ..< rule.omz {
+		for dy in 0 ..< rule.omy {
+			for dx in 0 ..< rule.omx {
 				new_value := rule.output[dx + dy * rule.omx + dz * rule.omx * rule.omy]
 				if new_value != 0xff {
 					sx := x + dx
@@ -513,7 +597,12 @@ persistent_all_fit :: proc(g: ^Grid, rule: ^Rule, x, y, z: int, mask: []bool, ch
 	}
 }
 
-persistent_one_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx: ^Exec_Context) -> bool {
+persistent_one_go :: proc(
+	n: ^Persistent_Node,
+	g: ^Grid,
+	random: ^MJRandom,
+	ctx: ^Exec_Context,
+) -> bool {
 	if len(n.rules) == 0 do return false
 	if n.steps > 0 && n.counter >= n.steps do return false
 	if !persistent_compute_observations_and_fields(n, g, random) do return false
@@ -522,7 +611,7 @@ persistent_one_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx:
 		for ci := start; ci < len(ctx.changes); ci += 1 {
 			c := ctx.changes[ci]
 			value := g.state[c.x + c.y * g.mx + c.z * g.mx * g.my]
-			for r in 0..<len(n.rules) {
+			for r in 0 ..< len(n.rules) {
 				rule := &n.rules[r]
 				for shift in rule.ishifts[value] {
 					sx := c.x - shift.x
@@ -534,10 +623,10 @@ persistent_one_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx:
 		}
 	} else {
 		n.match_count = 0
-		for r in 0..<len(n.match_mask) {
-			for i in 0..<len(n.match_mask[r]) do n.match_mask[r][i] = false
+		for r in 0 ..< len(n.match_mask) {
+			for i in 0 ..< len(n.match_mask[r]) do n.match_mask[r][i] = false
 		}
-		for r in 0..<len(n.rules) {
+		for r in 0 ..< len(n.rules) {
 			rule := &n.rules[r]
 			for z := rule.imz - 1; z < g.mz; z += rule.imz {
 				for y := rule.imy - 1; y < g.my; y += rule.imy {
@@ -574,11 +663,33 @@ persistent_one_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx:
 		n.match_count -= 1
 
 		if grid_matches(g, &n.rules[m.r], m.x, m.y, m.z) {
-			if trace, ok := os.lookup_env("MJ_TRACE_MARKOV", context.temp_allocator); ok && trace == "1" {
-				fmt.eprintf("TRACE Odin turn=%d node=%d rule=%d x=%d y=%d z=%d matchCount=%d matchIndex=%d\n", ctx.counter, n.debug_index, m.r, m.x, m.y, m.z, match_count_before, arg)
+			if trace, ok := os.lookup_env("MJ_TRACE_MARKOV", context.temp_allocator);
+			   ok && trace == "1" {
+				fmt.eprintf(
+					"TRACE Odin turn=%d node=%d rule=%d x=%d y=%d z=%d matchCount=%d matchIndex=%d\n",
+					ctx.counter,
+					n.debug_index,
+					m.r,
+					m.x,
+					m.y,
+					m.z,
+					match_count_before,
+					arg,
+				)
 			}
-			if trace, ok := os.lookup_env("MJ_TRACE_BRANCH", context.temp_allocator); ok && trace == "1" {
-				fmt.eprintf("TRACE Odin turn=%d node=%d kind=one rule=%d x=%d y=%d z=%d matchCount=%d matchIndex=%d\n", ctx.counter, n.debug_index, m.r, m.x, m.y, m.z, match_count_before, arg)
+			if trace, ok := os.lookup_env("MJ_TRACE_BRANCH", context.temp_allocator);
+			   ok && trace == "1" {
+				fmt.eprintf(
+					"TRACE Odin turn=%d node=%d kind=one rule=%d x=%d y=%d z=%d matchCount=%d matchIndex=%d\n",
+					ctx.counter,
+					n.debug_index,
+					m.r,
+					m.x,
+					m.y,
+					m.z,
+					match_count_before,
+					arg,
+				)
 			}
 			one_apply_with_context(g, &n.rules[m.r], m.x, m.y, m.z, &ctx.changes)
 			n.counter += 1
@@ -588,7 +699,12 @@ persistent_one_go :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx:
 	return false
 }
 
-persistent_one_go_potentials :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom, ctx: ^Exec_Context) -> bool {
+persistent_one_go_potentials :: proc(
+	n: ^Persistent_Node,
+	g: ^Grid,
+	random: ^MJRandom,
+	ctx: ^Exec_Context,
+) -> bool {
 	if n.observations != nil && observations_goal_reached(g.state, n.future) {
 		n.future_computed = false
 		return false
@@ -606,11 +722,22 @@ persistent_one_go_potentials :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJR
 			n.match_count -= 1
 			k -= 1
 		} else {
-			h, ok := field_delta_pointwise(g.state, &n.rules[m.r], m.x, m.y, m.z, n.fields, n.potentials, len(g.characters), g.mx, g.my)
+			h, ok := field_delta_pointwise(
+				g.state,
+				&n.rules[m.r],
+				m.x,
+				m.y,
+				m.z,
+				n.fields,
+				n.potentials,
+				len(g.characters),
+				g.mx,
+				g.my,
+			)
 			if !ok do continue
-			if !first_set { first_h = h; first_set = true }
+			if !first_set {first_h = h; first_set = true}
 			key := field_key(h, first_h, n.temperature, random)
-			if key > max_key { max_key = key; argmax = k }
+			if key > max_key {max_key = key; argmax = k}
 		}
 	}
 	if argmax < 0 do return false
@@ -620,26 +747,50 @@ persistent_one_go_potentials :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJR
 	return true
 }
 
-persistent_compute_observations_and_fields :: proc(n: ^Persistent_Node, g: ^Grid, random: ^MJRandom) -> bool {
+persistent_compute_observations_and_fields :: proc(
+	n: ^Persistent_Node,
+	g: ^Grid,
+	random: ^MJRandom,
+) -> bool {
 	if n.observations != nil && !n.future_computed {
 		if !observations_compute_future_set_present(n.future, g.state, n.observations) do return false
 		n.future_computed = true
 		if n.search {
-			if n.trajectory != nil { search_destroy_trajectory(n.trajectory); n.trajectory = nil }
+			if n.trajectory != nil {search_destroy_trajectory(n.trajectory); n.trajectory = nil}
 			tries := 1
 			if n.limit >= 0 do tries = 20
 			for k := 0; k < tries && n.trajectory == nil; k += 1 {
-				n.trajectory = search_run(g.state, n.future, n.rules[:], g.mx, g.my, g.mz, len(g.characters), n.kind == .All, n.limit, n.depth_coefficient, mj_random_next(random))
+				n.trajectory = search_run(
+					g.state,
+					n.future,
+					n.rules[:],
+					g.mx,
+					g.my,
+					g.mz,
+					len(g.characters),
+					n.kind == .All,
+					n.limit,
+					n.depth_coefficient,
+					mj_random_next(random),
+				)
 			}
 		} else {
-			observations_compute_backward_potentials(n.potentials, n.future, g.mx, g.my, g.mz, len(g.characters), n.rules[:])
+			observations_compute_backward_potentials(
+				n.potentials,
+				n.future,
+				g.mx,
+				g.my,
+				g.mz,
+				len(g.characters),
+				n.rules[:],
+			)
 		}
 	}
 	if n.potentials == nil || n.observations != nil do return true
 	any_success := false
 	any_computation := false
 	state_len := len(g.state)
-	for c in 0..<len(n.fields) {
+	for c in 0 ..< len(n.fields) {
 		f := &n.fields[c]
 		if f.present && (n.counter == 0 || f.recompute) {
 			success := field_compute(f, n.potentials[c * state_len:(c + 1) * state_len], g)
@@ -669,9 +820,9 @@ persistent_one_try_add :: proc(g: ^Grid, n: ^Persistent_Node, r, sx, sy, sz: int
 }
 
 one_apply_with_context :: proc(g: ^Grid, rule: ^Rule, x, y, z: int, changes: ^[dynamic]Cell) {
-	for dz in 0..<rule.omz {
-		for dy in 0..<rule.omy {
-			for dx in 0..<rule.omx {
+	for dz in 0 ..< rule.omz {
+		for dy in 0 ..< rule.omy {
+			for dx in 0 ..< rule.omx {
 				new_value := rule.output[dx + dy * rule.omx + dz * rule.omx * rule.omy]
 				if new_value != 0xff {
 					sx := x + dx

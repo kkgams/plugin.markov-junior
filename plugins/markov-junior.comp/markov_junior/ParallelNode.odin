@@ -28,8 +28,14 @@ run_parallel_node :: proc(g: ^Grid, rules: []Rule, random: ^MJRandom, steps: int
 	return changed
 }
 
-parallel_initial_scan :: proc(g: ^Grid, rules: []Rule, random: ^MJRandom, newstate: []u8, changes: ^[dynamic]Cell) {
-	for r in 0..<len(rules) {
+parallel_initial_scan :: proc(
+	g: ^Grid,
+	rules: []Rule,
+	random: ^MJRandom,
+	newstate: []u8,
+	changes: ^[dynamic]Cell,
+) {
+	for r in 0 ..< len(rules) {
 		rule := &rules[r]
 		for z := rule.imz - 1; z < g.mz; z += rule.imz {
 			for y := rule.imy - 1; y < g.my; y += rule.imy {
@@ -47,10 +53,17 @@ parallel_initial_scan :: proc(g: ^Grid, rules: []Rule, random: ^MJRandom, newsta
 	}
 }
 
-parallel_scan_around_changes :: proc(g: ^Grid, rules: []Rule, previous_changes: []Cell, random: ^MJRandom, newstate: []u8, changes: ^[dynamic]Cell) {
+parallel_scan_around_changes :: proc(
+	g: ^Grid,
+	rules: []Rule,
+	previous_changes: []Cell,
+	random: ^MJRandom,
+	newstate: []u8,
+	changes: ^[dynamic]Cell,
+) {
 	for c in previous_changes {
 		value := g.state[c.x + c.y * g.mx + c.z * g.mx * g.my]
-		for r in 0..<len(rules) {
+		for r in 0 ..< len(rules) {
 			rule := &rules[r]
 			for shift in rule.ishifts[value] {
 				sx := c.x - shift.x
@@ -62,9 +75,21 @@ parallel_scan_around_changes :: proc(g: ^Grid, rules: []Rule, previous_changes: 
 	}
 }
 
-parallel_try_add :: proc(g: ^Grid, rules: []Rule, r, sx, sy, sz: int, random: ^MJRandom, newstate: []u8, changes: ^[dynamic]Cell) {
+parallel_try_add :: proc(
+	g: ^Grid,
+	rules: []Rule,
+	r, sx, sy, sz: int,
+	random: ^MJRandom,
+	newstate: []u8,
+	changes: ^[dynamic]Cell,
+) {
 	rule := &rules[r]
-	if sx < 0 || sy < 0 || sz < 0 || sx + rule.imx > g.mx || sy + rule.imy > g.my || sz + rule.imz > g.mz {
+	if sx < 0 ||
+	   sy < 0 ||
+	   sz < 0 ||
+	   sx + rule.imx > g.mx ||
+	   sy + rule.imy > g.my ||
+	   sz + rule.imz > g.mz {
 		return
 	}
 	if !grid_matches(g, rule, sx, sy, sz) {
@@ -74,9 +99,9 @@ parallel_try_add :: proc(g: ^Grid, rules: []Rule, r, sx, sy, sz: int, random: ^M
 		return
 	}
 
-	for dz in 0..<rule.omz {
-		for dy in 0..<rule.omy {
-			for dx in 0..<rule.omx {
+	for dz in 0 ..< rule.omz {
+		for dy in 0 ..< rule.omy {
+			for dx in 0 ..< rule.omx {
 				new_value := rule.output[dx + dy * rule.omx + dz * rule.omx * rule.omy]
 				idi := sx + dx + (sy + dy) * g.mx + (sz + dz) * g.mx * g.my
 				if new_value != 0xff && new_value != g.state[idi] {

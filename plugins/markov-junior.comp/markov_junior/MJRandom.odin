@@ -26,7 +26,7 @@ mj_random_init :: proc(seed: i32) -> MJRandom {
 	mk := i32(1)
 
 	ii := i32(0)
-	for i in 1..<55 {
+	for i in 1 ..< 55 {
 		ii += 21
 		if ii >= 55 {
 			ii -= 55
@@ -41,8 +41,8 @@ mj_random_init :: proc(seed: i32) -> MJRandom {
 		mj = r.seed_array[ii]
 	}
 
-	for _ in 1..<5 {
-		for i in 1..<56 {
+	for _ in 1 ..< 5 {
+		for i in 1 ..< 56 {
 			n := i + 30
 			if n >= 55 {
 				n -= 55

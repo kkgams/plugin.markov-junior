@@ -4,13 +4,15 @@ import xml "core:encoding/xml"
 import "core:math"
 
 Field_State :: struct {
-	present: bool,
+	present:                        bool,
 	recompute, inversed, essential: bool,
-	zero, substrate: i32,
+	zero, substrate:                i32,
 }
 
 field_load :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid) -> Field_State {
-	f := Field_State{present = true}
+	f := Field_State {
+		present = true,
+	}
 	f.recompute = xml_attr_bool(doc, id, "recompute")
 	f.essential = xml_attr_bool(doc, id, "essential")
 	f.substrate = grid_wave_string(g, xml_attr(doc, id, "on"))
@@ -27,7 +29,7 @@ field_load :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid) -> Field_St
 field_compute :: proc(f: ^Field_State, potential: []int, g: ^Grid) -> bool {
 	front := make([dynamic]Path_Queue_Item)
 	defer delete(front)
-	for i in 0..<len(g.state) {
+	for i in 0 ..< len(g.state) {
 		potential[i] = -1
 		v := g.state[i]
 		if (f.zero & (i32(1) << uint(v))) != 0 {
@@ -53,7 +55,13 @@ field_compute :: proc(f: ^Field_State, potential: []int, g: ^Grid) -> bool {
 	return true
 }
 
-field_push :: proc(f: ^Field_State, g: ^Grid, potential: []int, front: ^[dynamic]Path_Queue_Item, t, x, y, z: int) {
+field_push :: proc(
+	f: ^Field_State,
+	g: ^Grid,
+	potential: []int,
+	front: ^[dynamic]Path_Queue_Item,
+	t, x, y, z: int,
+) {
 	if x < 0 || y < 0 || z < 0 || x >= g.mx || y >= g.my || z >= g.mz do return
 	i := x + y * g.mx + z * g.mx * g.my
 	v := g.state[i]
@@ -63,10 +71,20 @@ field_push :: proc(f: ^Field_State, g: ^Grid, potential: []int, front: ^[dynamic
 	}
 }
 
-field_delta_pointwise :: proc(state: []u8, rule: ^Rule, x, y, z: int, fields: []Field_State, potentials: []int, c_count, mx, my: int) -> (int, bool) {
+field_delta_pointwise :: proc(
+	state: []u8,
+	rule: ^Rule,
+	x, y, z: int,
+	fields: []Field_State,
+	potentials: []int,
+	c_count, mx, my: int,
+) -> (
+	int,
+	bool,
+) {
 	sum := 0
 	dx, dy, dz := 0, 0, 0
-	for di in 0..<len(rule.input) {
+	for di in 0 ..< len(rule.input) {
 		new_value := rule.output[di]
 		if new_value != 0xff && (rule.input[di] & (i32(1) << uint(new_value))) == 0 {
 			i := x + dx + (y + dy) * mx + (z + dz) * mx * my
@@ -85,7 +103,7 @@ field_delta_pointwise :: proc(state: []u8, rule: ^Rule, x, y, z: int, fields: []
 		dx += 1
 		if dx == rule.imx {
 			dx = 0; dy += 1
-			if dy == rule.imy { dy = 0; dz += 1 }
+			if dy == rule.imy {dy = 0; dz += 1}
 		}
 	}
 	return sum, true

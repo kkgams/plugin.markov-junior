@@ -1,11 +1,11 @@
 package markov_junior
 
-import "core:math"
 import xml "core:encoding/xml"
+import "core:math"
 
 Path_State :: struct {
-	start, finish, substrate: i32,
-	value: u8,
+	start, finish, substrate:          i32,
+	value:                             u8,
 	inertia, longest, edges, vertices: bool,
 }
 
@@ -16,7 +16,7 @@ Path_Queue_Item :: struct {
 path_load :: proc(doc: ^xml.Document, id: xml.Element_ID, g: ^Grid) -> Path_State {
 	from := xml_attr(doc, id, "from")
 	color := xml_attr(doc, id, "color", from[:1])
-	return Path_State{
+	return Path_State {
 		start = grid_wave_string(g, from),
 		value = grid_value(g, color[0]),
 		finish = grid_wave_string(g, xml_attr(doc, id, "to")),
@@ -35,9 +35,9 @@ path_go :: proc(p: ^Path_State, g: ^Grid, random: ^MJRandom, changes: ^[dynamic]
 	defer delete(starts)
 	generations := make([]int, len(g.state))
 	defer delete(generations)
-	for i in 0..<len(generations) do generations[i] = -1
+	for i in 0 ..< len(generations) do generations[i] = -1
 
-	for z in 0..<g.mz do for y in 0..<g.my do for x in 0..<g.mx {
+	for z in 0 ..< g.mz do for y in 0 ..< g.my do for x in 0 ..< g.mx {
 		i := x + y * g.mx + z * g.mx * g.my
 		s := g.state[i]
 		if (p.start & (i32(1) << uint(s))) != 0 do append(&starts, Cell{x, y, z})
@@ -100,20 +100,38 @@ path_go :: proc(p: ^Path_State, g: ^Grid, random: ^MJRandom, changes: ^[dynamic]
 	return true
 }
 
-path_push :: proc(g: ^Grid, p: ^Path_State, generations: []int, frontier: ^[dynamic]Path_Queue_Item, t, x, y, z: int) {
+path_push :: proc(
+	g: ^Grid,
+	p: ^Path_State,
+	generations: []int,
+	frontier: ^[dynamic]Path_Queue_Item,
+	t, x, y, z: int,
+) {
 	i := x + y * g.mx + z * g.mx * g.my
 	v := g.state[i]
-	if generations[i] == -1 && ((p.substrate & (i32(1) << uint(v))) != 0 || (p.start & (i32(1) << uint(v))) != 0) {
+	if generations[i] == -1 &&
+	   ((p.substrate & (i32(1) << uint(v))) != 0 || (p.start & (i32(1) << uint(v))) != 0) {
 		if (p.substrate & (i32(1) << uint(v))) != 0 do append(frontier, Path_Queue_Item{t, x, y, z})
 		generations[i] = t
 	}
 }
 
-path_direction :: proc(p: ^Path_State, g: ^Grid, x, y, z, dx, dy, dz: int, generations: []int, random: ^MJRandom) -> Cell {
+path_direction :: proc(
+	p: ^Path_State,
+	g: ^Grid,
+	x, y, z, dx, dy, dz: int,
+	generations: []int,
+	random: ^MJRandom,
+) -> Cell {
 	candidates := make([dynamic]Cell)
 	defer delete(candidates)
 	gen := generations[x + y * g.mx + z * g.mx * g.my]
-	path_add_candidate :: proc(candidates: ^[dynamic]Cell, generations: []int, mx, my: int, x, y, z, dx, dy, dz, gen: int) {
+	path_add_candidate :: proc(
+		candidates: ^[dynamic]Cell,
+		generations: []int,
+		mx, my: int,
+		x, y, z, dx, dy, dz, gen: int,
+	) {
 		if generations[x + dx + (y + dy) * mx + (z + dz) * mx * my] == gen - 1 do append(candidates, Cell{dx, dy, dz})
 	}
 
@@ -138,7 +156,9 @@ path_direction :: proc(p: ^Path_State, g: ^Grid, x, y, z, dx, dy, dz: int, gener
 		result := Cell{-1, -1, -1}
 		for c in candidates {
 			noise := 0.1 * mj_random_next_f64(random)
-			cos := f64(c.x * dx + c.y * dy + c.z * dz) / math.sqrt(f64((c.x * c.x + c.y * c.y + c.z * c.z) * (dx * dx + dy * dy + dz * dz)))
+			cos :=
+				f64(c.x * dx + c.y * dy + c.z * dz) /
+				math.sqrt(f64((c.x * c.x + c.y * c.y + c.z * c.z) * (dx * dx + dy * dy + dz * dz)))
 			if cos + noise > max_scalar {
 				max_scalar = cos + noise
 				result = c

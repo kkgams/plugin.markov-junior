@@ -576,7 +576,7 @@ function tileFromAttr(attr, named, patterns, s, sz) {
     return p
 }
 
-function tileWfcFromElement(elementXml, inheritedSymmetry, options) {
+function tileWfcFromElement(elementXml, _inheritedSymmetry, options) {
     const start = xmlRootStartTag(elementXml)
     const name = xmlAttr(start, "tileset")
     const tilesName = xmlAttr(start, "tiles", name)
@@ -1215,7 +1215,7 @@ export function xmlDirectChildTags(xml) {
         tagRe.lastIndex = headEnd + 1
         let depth = 1
         let closeEnd = -1
-        for (let match; (match = tagRe.exec(inner)); ) {
+        for (let match = tagRe.exec(inner); match; match = tagRe.exec(inner)) {
             if (match[1] !== name) continue
             const full = match[0]
             if (full.startsWith("</")) depth -= 1
